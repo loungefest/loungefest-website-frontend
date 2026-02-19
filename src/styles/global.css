@@ -1,1 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-display: "ClashDisplay-Variable", "ClashDisplay-Regular", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Mulish", ui-sans-serif, system-ui, sans-serif;
+
+  --color-sky: #4e99d2;
+  --color-sky-50: #e0ebf7;
+  --color-sky-100: #d1e1f3;
+  --color-sky-200: #b4cfeb;
+  --color-sky-300: #95bde2;
+  --color-sky-400: #74abda;
+  --color-sky-500: #4e99d2;
+  --color-sky-600: #427ca9;
+  --color-sky-700: #365f81;
+  --color-sky-800: #2a455b;
+  --color-sky-900: #1d2b38;
+  --color-sky-950: #172028;
+
+  --color-midnight: #231f46;
+  --color-midnight-50: #d2cfd9;
+  --color-midnight-100: #bdbac8;
+  --color-midnight-200: #948fa6;
+  --color-midnight-300: #6d6784;
+  --color-midnight-400: #474165;
+  --color-midnight-500: #231f46;
+  --color-midnight-600: #1e1b3a;
+  --color-midnight-700: #1a172e;
+  --color-midnight-800: #151223;
+  --color-midnight-900: #100c19;
+  --color-midnight-950: #0b0813;
+
+  --color-plum: #6b0f53;
+  --color-plum-50: #e4d1dc;
+  --color-plum-100: #d7bbcc;
+  --color-plum-200: #bd91ac;
+  --color-plum-300: #a2688d;
+  --color-plum-400: #873f70;
+  --color-plum-500: #6b0f53;
+  --color-plum-600: #581244;
+  --color-plum-700: #451236;
+  --color-plum-800: #331128;
+  --color-plum-900: #220e1b;
+  --color-plum-950: #1b0a15;
+
+  --color-magenta: #e849be;
+  --color-magenta-50: #fee0f3;
+  --color-magenta-100: #fdd1ed;
+  --color-magenta-200: #fab2e1;
+  --color-magenta-300: #f593d5;
+  --color-magenta-400: #ef71ca;
+  --color-magenta-500: #e849be;
+  --color-magenta-600: #ba3e99;
+  --color-magenta-700: #8f3475;
+  --color-magenta-800: #652853;
+  --color-magenta-900: #3e1c34;
+  --color-magenta-950: #2c1625;
+
+  --color-sand: #ebe6dd;
+  --color-sand-50: #fbfaf8;
+  --color-sand-100: #f9f8f5;
+  --color-sand-200: #f6f3ef;
+  --color-sand-300: #f2efe9;
+  --color-sand-400: #efeae3;
+  --color-sand-500: #ebe6dd;
+  --color-sand-600: #bcb8b1;
+  --color-sand-700: #8f8c87;
+  --color-sand-800: #656360;
+  --color-sand-900: #3e3d3b;
+  --color-sand-950: #2b2b29;
+
+  --color-lime: #c2e800;
+  --color-lime-50: #f6fbd9;
+  --color-lime-100: #f2f9c7;
+  --color-lime-200: #e8f5a2;
+  --color-lime-300: #dcf07c;
+  --color-lime-400: #d0ec51;
+  --color-lime-500: #c2e800;
+  --color-lime-600: #9cba14;
+  --color-lime-700: #788e19;
+  --color-lime-800: #566418;
+  --color-lime-900: #363d14;
+  --color-lime-950: #272b11;
+
+  --color-bronze: #69580f;
+  --color-bronze-50: #e3ddcf;
+  --color-bronze-100: #d5cdb8;
+  --color-bronze-200: #bbae8d;
+  --color-bronze-300: #a09063;
+  --color-bronze-400: #84733b;
+  --color-bronze-500: #69580f;
+  --color-bronze-600: #564810;
+  --color-bronze-700: #443910;
+  --color-bronze-800: #322a0f;
+  --color-bronze-900: #221c0b;
+  --color-bronze-950: #1a1607;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+}
+
+/**
+* @license
+*
+* Font Family: Clash Display
+* Designed by: Indian Type Foundry
+* URL: https://www.fontshare.com/fonts/clash-display
+* © 2026 Indian Type Foundry
+*
+* Clash Display Extralight
+* Clash Display Light
+* Clash Display Regular
+* Clash Display Medium
+* Clash Display Semibold
+* Clash Display Bold
+* Clash Display Variable (Variable font)
+*
+*/
+@font-face {
+  font-family: 'ClashDisplay-Extralight';
+  src: url('../assets/fonts/ClashDisplay-Extralight.woff2') format('woff2'),
+       url('../assets/fonts/ClashDisplay-Extralight.woff') format('woff'),
+       url('../assets/fonts/ClashDisplay-Extralight.ttf') format('truetype');
+  font-weight: 200;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'ClashDisplay-Light';
+  src: url('../assets/fonts/ClashDisplay-Light.woff2') format('woff2'),
+       url('../assets/fonts/ClashDisplay-Light.woff') format('woff'),
+       url('../assets/fonts/ClashDisplay-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'ClashDisplay-Regular';
+  src: url('../assets/fonts/ClashDisplay-Regular.woff2') format('woff2'),
+       url('../assets/fonts/ClashDisplay-Regular.woff') format('woff'),
+       url('../assets/fonts/ClashDisplay-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'ClashDisplay-Medium';
+  src: url('../assets/fonts/ClashDisplay-Medium.woff2') format('woff2'),
+       url('../assets/fonts/ClashDisplay-Medium.woff') format('woff'),
+       url('../assets/fonts/ClashDisplay-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'ClashDisplay-Semibold';
+  src: url('../assets/fonts/ClashDisplay-Semibold.woff2') format('woff2'),
+       url('../assets/fonts/ClashDisplay-Semibold.woff') format('woff'),
+       url('../assets/fonts/ClashDisplay-Semibold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'ClashDisplay-Bold';
+  src: url('../assets/fonts/ClashDisplay-Bold.woff2') format('woff2'),
+       url('../assets/fonts/ClashDisplay-Bold.woff') format('woff'),
+       url('../assets/fonts/ClashDisplay-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+}

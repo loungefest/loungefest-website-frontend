@@ -1,0 +1,25 @@
+---
+import loungefestLogo from '../assets/loungefest-icon.svg';
+---
+
+<header class="bg-linear-to-r from-plum to-magenta text-white px-8 h-24 flex items-center justify-between shadow-lg relative z-50">
+    <div class="flex items-center gap-10">
+        <a href="/tickets" class="border-2 border-white rounded-full px-6 py-1.5 font-display font-bold text-xl hover:bg-white hover:text-plum transition-all duration-300">
+            Tickets kopen
+        </a>
+        <a href="/" class="flex items-center transition-transform hover:scale-105 duration-300">
+            <img src={loungefestLogo.src} alt="Loungefest Logo" class="h-10 w-auto" />
+        </a>
+    </div>
+
+    <nav>
+        <ul class="flex gap-10 font-display font-bold text-2xl">
+            <li><a href="/" class="hover:opacity-80 transition-opacity">Home</a></li>
+            <li><a href="/programma" class="hover:opacity-80 transition-opacity">Programma</a></li>
+            <li><a href="/tickets" class="hover:opacity-80 transition-opacity">Tickets</a></li>
+            <li><a href="/sponsors" class="hover:opacity-80 transition-opacity">Sponsors</a></li>
+            <li><a href="/over-ons" class="hover:opacity-80 transition-opacity">Over ons</a></li>
+            <li><a href="/info" class="hover:opacity-80 transition-opacity">Info</a></li>
+        </ul>
+    </nav>
+</header>
