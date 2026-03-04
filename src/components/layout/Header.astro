@@ -2,6 +2,8 @@
 import LoungefestIcon from '../logo/LoungefestIcon.astro';
 import LavaLamp from '../visuals/LavaLamp.astro';
 import Button from '../ui/Button.astro';
+
+const base = import.meta.env.BASE_URL;
 ---
 
 <header id="main-header" class="bg-plum text-white px-8 h-24 flex items-center justify-between shadow-lg fixed top-0 left-0 right-0 z-50 transition-transform duration-300">
@@ -9,7 +11,7 @@ import Button from '../ui/Button.astro';
         <LavaLamp color="magenta" ballSize={10} numBalls={20} />
     </div>
     <div class="flex items-center gap-10 relative z-10">
-        <a href="/" class="flex items-center transition-transform hover:scale-105 duration-300">
+        <a href={base} class="flex items-center transition-transform hover:scale-105 duration-300">
             <LoungefestIcon class="h-10 w-10" aria-label="Loungefest Logo" />
         </a>
     </div>
@@ -23,11 +25,11 @@ import Button from '../ui/Button.astro';
 
     <nav class="hidden lg:block relative z-10">
         <ul class="flex gap-10 font-display font-bold text-2xl">
-            <li><a href="/programma" class="hover:opacity-80 transition-opacity font-bold">Programma</a></li>
-            <li><a href="/sponsors" class="hover:opacity-80 transition-opacity font-bold">Sponsors</a></li>
-            <li><a href="/ploegen" class="hover:opacity-80 transition-opacity font-bold">Ploegen</a></li>
-            <li><a href="/edities" class="hover:opacity-80 transition-opacity font-bold">Edities</a></li>
-            <li><a href="/info" class="hover:opacity-80 transition-opacity font-bold">Info</a></li>
+            <li><a href={`${base}programma`} class="hover:opacity-80 transition-opacity font-bold">Programma</a></li>
+            <li><a href={`${base}sponsors`} class="hover:opacity-80 transition-opacity font-bold">Sponsors</a></li>
+            <li><a href={`${base}ploegen`} class="hover:opacity-80 transition-opacity font-bold">Ploegen</a></li>
+            <li><a href={`${base}edities`} class="hover:opacity-80 transition-opacity font-bold">Edities</a></li>
+            <li><a href={`${base}info`} class="hover:opacity-80 transition-opacity font-bold">Info</a></li>
         </ul>
     </nav>
 

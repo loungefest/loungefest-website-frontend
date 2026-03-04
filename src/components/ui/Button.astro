@@ -19,7 +19,7 @@ const {
 
 // Automatically prefix absolute internal links with BASE_URL for subfolder hosting (GH Pages)
 const href = rawHref?.startsWith('/') && !rawHref.startsWith('//')
-    ? rawHref
+    ? `${import.meta.env.BASE_URL}${rawHref.slice(1)}`
     : rawHref;
 
 const themeColors = ['sky', 'midnight', 'plum', 'magenta', 'sand', 'lime', 'bronze', 'white'];
