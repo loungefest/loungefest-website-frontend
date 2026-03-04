@@ -1,0 +1,123 @@
+---
+import Button from '../ui/Button.astro';
+
+const podia = [
+    {
+        name: 'Adanses',
+        description: 'Hier komt een stukje tekst over het Adanses podium. Wat voor soort muziekgenre hier gespeeld gaat worden.',
+        image: '/images/lf-hero.jpg',
+    },
+    {
+        name: 'Lakeside',
+        description: 'Geniet van relaxte beats met uitzicht op het water. De perfecte plek om even helemaal tot rust te komen.',
+        image: '/images/lf-hero.jpg',
+    },
+    {
+        name: 'The Forest',
+        description: 'Verscholen tussen de bomen vind je de meest verrassende acts en een magische sfeer.',
+        image: '/images/lf-hero.jpg',
+    }
+];
+---
+
+<section class="relative pt-24 pb-16 overflow-hidden">
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="text-center mb-8">
+            <h2 class="font-display text-6xl md:text-8xl font-bold text-bronze mb-6 tracking-tight">Podia</h2>
+        </div>
+
+        <!-- Swiper Container -->
+        <div class="swiper podia-swiper !overflow-visible max-w-4xl mx-auto">
+            <div class="swiper-wrapper">
+                {podia.map((podium) => (
+                    <div class="swiper-slide text-center">
+                        <div class="max-w-2xl mx-auto mb-12">
+                            <h3 class="font-display text-2xl md:text-3xl font-bold text-bronze mb-4">{podium.name}</h3>
+                            <p class="text-lg md:text-xl text-bronze/80 font-sans font-medium leading-relaxed">
+                                {podium.description}
+                            </p>
+                        </div>
+
+                        <div class="relative group max-w-md mx-auto mb-12">
+                            <div class="aspect-square overflow-hidden rounded-[3rem] shadow-2xl">
+                                <img
+                                    src={podium.image}
+                                    alt={podium.name}
+                                    class="h-full w-full object-cover"
+                                />
+                            </div>
+
+                            <!-- Navigation Buttons (Outside the image) -->
+                            <div class="absolute inset-y-0 left-0 right-0 flex items-center justify-between z-20 pointer-events-none">
+                                <button class="podia-prev -translate-x-full -ml-4 md:-ml-8 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-bronze text-sand transition-all hover:bg-bronze hover:scale-110 active:scale-95 shadow-lg pointer-events-auto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                </button>
+                                <button class="podia-next translate-x-full -mr-4 md:-mr-8 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-bronze text-sand transition-all hover:bg-bronze hover:scale-110 active:scale-95 shadow-lg pointer-events-auto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <!-- Button at the bottom -->
+        <div class="flex justify-center mt-8">
+            <Button
+                href="/programma"
+                variant="outline"
+                color="midnight"
+            >
+                Bekijk het programma
+            </Button>
+        </div>
+    </div>
+</section>
+
+<script>
+    import Swiper from 'swiper';
+    import { Navigation, EffectFade, Autoplay } from 'swiper/modules';
+    import 'swiper/css';
+    import 'swiper/css/navigation';
+    import 'swiper/css/effect-fade';
+
+    const initPodiaSwiper = () => {
+        new Swiper('.podia-swiper', {
+            modules: [Navigation, EffectFade, Autoplay],
+            slidesPerView: 1,
+            spaceBetween: 40,
+            loop: true,
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: true,
+            },
+            navigation: {
+                nextEl: '.podia-next',
+                prevEl: '.podia-prev',
+            },
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', initPodiaSwiper);
+    document.addEventListener('astro:page-load', initPodiaSwiper);
+</script>
+
+<style>
+    .swiper-slide {
+        opacity: 0 !important;
+        transition: opacity 0.5s ease-in-out;
+    }
+    .swiper-slide-active {
+        opacity: 1 !important;
+    }
+
+    .text-bronze {
+        color: var(--color-bronze);
+    }
+</style>

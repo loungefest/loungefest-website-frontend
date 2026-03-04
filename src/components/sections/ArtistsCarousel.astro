@@ -1,0 +1,111 @@
+---
+const artists = [
+    { name: 'Prins S. en De Geit', image: '/images/lf-hero.jpg' },
+    { name: 'Goldband', image: '/images/lf-hero.jpg' },
+    { name: 'Froukje', image: '/images/lf-hero.jpg' },
+    { name: 'Joost', image: '/images/lf-hero.jpg' },
+    { name: 'Sophie Straat', image: '/images/lf-hero.jpg' },
+    { name: 'New Artist', image: '/images/lf-hero.jpg' },
+    { name: 'Another Artist', image: '/images/lf-hero.jpg' },
+    { name: 'Yet Another Artist', image: '/images/lf-hero.jpg' },
+    { name: 'Even More Artist', image: '/images/lf-hero.jpg' },
+    { name: 'And Another One', image: '/images/lf-hero.jpg' },
+    { name: 'Final Artist', image: '/images/lf-hero.jpg' },
+    { name: 'Last Artist', image: '/images/lf-hero.jpg' },
+    { name: 'Extra Artist', image: '/images/lf-hero.jpg' },
+    { name: 'Additional Artist', image: '/images/lf-hero.jpg' },
+];
+---
+
+<section class="relative overflow-hidden pb-8">
+    <div class="container mx-auto px-4 relative z-10">
+        <!-- Swiper Container -->
+        <div class="swiper artist-swiper !overflow-visible">
+            <div class="swiper-wrapper">
+                {artists.map((artist) => (
+                    <div class="swiper-slide">
+                        <div class="group relative aspect-square overflow-hidden rounded-[2rem] bg-plum-800 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl">
+                            <img
+                                src={artist.image}
+                                alt={artist.name}
+                                class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+                            <!-- Overlay with artist name -->
+                            <div class="absolute inset-0 flex items-end bg-linear-to-t from-plum-950/80 via-plum-950/20 to-transparent p-8">
+                                <h3 class="font-display text-2xl md:text-3xl font-bold text-white uppercase tracking-tight leading-none">
+                                    {artist.name}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="mt-12 flex justify-end gap-4 px-4">
+                <button class="swiper-button-prev-custom flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-plum text-sand transition-all hover:bg-magenta hover:scale-110 active:scale-95 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <button class="swiper-button-next-custom flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-plum text-sand transition-all hover:bg-magenta hover:scale-110 active:scale-95 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+    import Swiper from 'swiper';
+    import { Navigation, Autoplay } from 'swiper/modules';
+    import 'swiper/css';
+    import 'swiper/css/navigation';
+    import 'swiper/css/autoplay';
+
+    // Initialize Swiper
+    const initSwiper = () => {
+        new Swiper('.artist-swiper', {
+            modules: [Navigation, Autoplay],
+            slidesPerView: 1.2,
+            spaceBetween: 20,
+            loop: true,
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next-custom',
+                prevEl: '.swiper-button-prev-custom',
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 2.2,
+                    spaceBetween: 24,
+                },
+                1024: {
+                    slidesPerView: 3.2,
+                    spaceBetween: 32,
+                },
+                1280: {
+                    slidesPerView: 4.2,
+                    spaceBetween: 40,
+                },
+            },
+        });
+    };
+
+    // Run on page load and on Astro view transition
+    document.addEventListener('DOMContentLoaded', initSwiper);
+    document.addEventListener('astro:page-load', initSwiper);
+</script>
+
+<style>
+    .swiper-slide {
+        height: auto;
+    }
+
+    /* Ensure the swiper container can overflow if needed, or keep it contained */
+    .artist-swiper {
+        overflow: visible;
+    }
+</style>

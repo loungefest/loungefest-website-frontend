@@ -1,0 +1,45 @@
+---
+import LoungefestIcon from '../logo/LoungefestIcon.astro';
+import Button from '../ui/Button.astro';
+---
+
+<section class="relative bg-midnight py-24 overflow-hidden flex flex-col items-center">
+    <!-- Background Visual (Feather) -->
+    <div class="absolute -right-32 -bottom-24 h-[120%] w-[70%] opacity-20 select-none pointer-events-none">
+        <LoungefestIcon
+            color="sky"
+            class="h-full w-full rotate-[-10deg] object-contain object-right"
+        />
+    </div>
+
+    <div class="container relative z-10 px-4 flex flex-col items-center text-center">
+        <!-- Heading -->
+        <h2 class="font-display font-bold text-5xl md:text-7xl mb-16 text-sky-400 tracking-tight">
+            Alvast warmdraaien?
+        </h2>
+
+        <!-- Spotify Player Container -->
+        <div class="w-full max-w-sm flex flex-col items-center gap-12 mb-16">
+            <iframe
+                data-testid="embed-iframe"
+                style="border-radius:12px"
+                src="https://open.spotify.com/embed/playlist/7dw90IrZQ4QO7LTDWuQgqT?utm_source=generator"
+                width="100%" height="352"
+                frameBorder="0"
+                allowfullscreen=""
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+            ></iframe>
+
+        <!-- CTA Button -->
+        <Button
+            href="/tickets"
+            variant="outline"
+            color="white"
+            size="md"
+            class="min-w-[240px]"
+        >
+            Tickets LF 2026
+        </Button>
+    </div>
+</section>

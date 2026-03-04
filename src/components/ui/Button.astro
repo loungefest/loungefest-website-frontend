@@ -1,7 +1,8 @@
 ---
 interface Props {
 	href?: string;
-	variant?: 'primary' | 'outline';
+	variant?: 'primary' | 'outline' | 'ghost' | 'solid' | 'sky' | 'midnight' | 'plum' | 'magenta' | 'sand' | 'lime' | 'bronze' | 'white';
+	color?: 'sky' | 'midnight' | 'plum' | 'magenta' | 'sand' | 'lime' | 'bronze' | 'white';
 	size?: 'sm' | 'md' | 'lg' | 'xl';
 	class?: string;
 	[key: string]: any;
@@ -10,17 +11,81 @@ interface Props {
 const {
     href,
     variant = 'primary',
+    color: colorProp,
     size = 'md',
     class: className,
     ...rest
 } = Astro.props;
 
+const themeColors = ['sky', 'midnight', 'plum', 'magenta', 'sand', 'lime', 'bronze', 'white'];
+
+// Determine effective color and variant
+let effectiveColor = colorProp;
+let effectiveVariant = variant;
+
+if (themeColors.includes(variant as string)) {
+    effectiveColor = variant as any;
+    effectiveVariant = 'solid';
+} else if (variant === 'primary') {
+    effectiveColor = colorProp || 'lime';
+    effectiveVariant = 'solid';
+} else if (variant === 'outline') {
+    effectiveColor = colorProp || 'white';
+} else if (variant === 'ghost') {
+    effectiveColor = colorProp || 'white';
+} else if (variant === 'solid') {
+    effectiveColor = colorProp || 'lime';
+}
+
+const colorMap: Record<string, { solid: string; outline: string; ghost: string }> = {
+    sky: {
+        solid: 'bg-sky text-white hover:shadow-sky/20',
+        outline: 'border-sky text-sky hover:bg-sky hover:text-white',
+        ghost: 'text-sky hover:bg-sky/10'
+    },
+    midnight: {
+        solid: 'bg-midnight text-white hover:shadow-midnight/20',
+        outline: 'border-midnight text-midnight hover:bg-midnight hover:text-white',
+        ghost: 'text-midnight hover:bg-midnight/10'
+    },
+    plum: {
+        solid: 'bg-plum text-white hover:shadow-plum/20',
+        outline: 'border-plum text-plum hover:bg-plum hover:text-white',
+        ghost: 'text-plum hover:bg-plum/10'
+    },
+    magenta: {
+        solid: 'bg-magenta text-white hover:shadow-magenta/20',
+        outline: 'border-magenta text-magenta hover:bg-magenta hover:text-white',
+        ghost: 'text-magenta hover:bg-magenta/10'
+    },
+    sand: {
+        solid: 'bg-sand text-plum hover:shadow-sand/20',
+        outline: 'border-sand text-sand hover:bg-sand hover:text-plum',
+        ghost: 'text-sand hover:bg-sand/10'
+    },
+    lime: {
+        solid: 'bg-lime text-plum hover:shadow-lime/20',
+        outline: 'border-lime text-lime hover:bg-lime hover:text-plum',
+        ghost: 'text-lime hover:bg-lime/10'
+    },
+    bronze: {
+        solid: 'bg-bronze text-white hover:shadow-bronze/20',
+        outline: 'border-bronze text-bronze hover:bg-bronze hover:text-white',
+        ghost: 'text-bronze hover:bg-bronze/10'
+    },
+    white: {
+        solid: 'bg-white text-plum hover:shadow-white/20',
+        outline: 'border-white text-white hover:bg-white hover:text-plum',
+        ghost: 'text-white hover:bg-white/10'
+    }
+};
+
+const colorStyles = colorMap[effectiveColor as string] || colorMap.lime;
+
 const variants = {
-    primary: 'bg-lime text-plum hover:scale-105 shadow-xl hover:shadow-lime/20',
-    outline: 'border-2 border-white text-white hover:bg-white hover:text-plum',
-    magenta: 'bg-magenta text-white hover:scale-105 shadow-xl hover:shadow-magenta/20',
-    plum: 'bg-plum text-white hover:scale-105 shadow-xl hover:shadow-plum/20',
-    ghost: 'hover:bg-white/10 text-white'
+    solid: `${colorStyles.solid} hover:scale-105 shadow-xl`,
+    outline: `border-2 ${colorStyles.outline}`,
+    ghost: colorStyles.ghost
 };
 
 const sizes = {
@@ -31,7 +96,7 @@ const sizes = {
 };
 
 const baseStyles = 'inline-block font-display font-bold rounded-full transition-all duration-300 text-center';
-const elementStyles = [baseStyles, variants[variant], sizes[size], className].join(' ');
+const elementStyles = [baseStyles, (variants as any)[effectiveVariant] || variants.solid, sizes[size], className].join(' ');
 
 const Element = href ? 'a' : 'button';
 const typeAttribute = Element === 'button' ? { type: rest.type || 'button' } : {};
