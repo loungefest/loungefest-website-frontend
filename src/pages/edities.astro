@@ -1,0 +1,62 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const edities = [
+    { title: 'Editie 10', year: '2024', youtubeId: 'GArMcgqB7ZQ' },
+    { title: 'Editie 9', year: '2023', youtubeId: '8249TbOY_nw' },
+    { title: 'Editie 8', year: '2022', youtubeId: 'Z9uUx-SStqY' },
+    { title: 'Editie 7.5', year: '2020', youtubeId: '90Ieo0YlzvA' },
+    { title: 'Editie 7', year: '2019', youtubeId: 'kfPbySw8_z4' },
+    { title: 'Editie 6', year: '2018', youtubeId: 'eLe0KV0spQ4' },
+    { title: 'Editie 5', year: '2017', youtubeId: '7HqQSlaF7h8' },
+    { title: 'Editie 4', year: '2016', youtubeId: 'zfYwiPWz5Uw' },
+    { title: 'Editie 3', year: '2015', youtubeId: 'wrIXiTg2JA4' },
+    { title: 'Editie 2', year: '2014', youtubeId: 'X-mRpwtN7F0' },
+    { title: 'Editie 1', year: '2013', youtubeId: 'XoHTH_I3tOo' },
+];
+---
+
+<Layout>
+    <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
+        <img
+            src="/images/lf-hero.jpg"
+            alt="Edities Hero"
+            class="absolute inset-0 h-full w-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/30"></div>
+    </section>
+
+    <section class="bg-midnight py-24 text-white min-h-screen">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <h1 class="text-center font-display text-7xl md:text-8xl font-bold mb-20 tracking-tight text-sky">
+                Edities
+            </h1>
+
+            <div class="edities grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20">
+                {edities.map((editie) => (
+                    <div class="editie flex flex-col gap-8">
+                        <div class="aspect-video overflow-hidden rounded-[2.5rem] bg-plum-800 shadow-xl border-4 border-sky/20">
+                            <iframe
+                                src={`https://www.youtube.com/embed/${editie.youtubeId}`}
+                                title={`${editie.title} (${editie.year})`}
+                                class="h-full w-full"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allowfullscreen
+                            ></iframe>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <h3 class="font-display text-5xl font-bold text-sky leading-none">
+                                {editie.title}
+                            </h3>
+                            <p class="font-display text-3xl font-medium text-white">
+                                {editie.year}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+</Layout>

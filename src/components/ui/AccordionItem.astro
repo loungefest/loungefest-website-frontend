@@ -1,0 +1,117 @@
+---
+interface Props {
+  title: string;
+  id: string;
+}
+
+const { title, id } = Astro.props;
+---
+
+<div class="border-t border-white/30 last:border-b transition-colors duration-300">
+  <button
+    type="button"
+    class="flex w-full items-center justify-between py-6 px-4 text-left font-display text-xl md:text-2xl font-bold text-white hover:bg-white/5 transition-colors focus:outline-none group"
+    aria-expanded="false"
+    aria-controls={`content-${id}`}
+    data-accordion-trigger
+  >
+    <span>{title}</span>
+    <span class="relative h-6 w-6 flex items-center justify-center transition-transform duration-300 transform group-data-[state=open]:rotate-45" data-icon>
+      <span class="absolute block h-0.5 w-6 bg-white"></span>
+      <span class="absolute block h-6 w-0.5 bg-white"></span>
+    </span>
+  </button>
+  <div
+    id={`content-${id}`}
+    class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out bg-plum-600/50"
+    role="region"
+    aria-labelledby={`trigger-${id}`}
+    data-accordion-content
+  >
+    <div class="px-6 py-8 text-lg md:text-xl font-sans text-white/90 leading-relaxed accordion-content max-w-none">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<script>
+  function setupAccordion() {
+    const triggers = document.querySelectorAll('[data-accordion-trigger]');
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+        const contentId = trigger.getAttribute('aria-controls');
+        const content = document.getElementById(contentId!);
+        const icon = trigger.querySelector('[data-icon]');
+
+        // Toggle state
+        trigger.setAttribute('aria-expanded', (!isExpanded).toString());
+        trigger.setAttribute('data-state', !isExpanded ? 'open' : 'closed');
+
+        if (!isExpanded) {
+          // Open
+          if (content) {
+             content.style.maxHeight = content.scrollHeight + 'px';
+          }
+          icon?.classList.add('rotate-45');
+        } else {
+          // Close
+          if (content) {
+             content.style.maxHeight = '0';
+          }
+          icon?.classList.remove('rotate-45');
+        }
+      });
+    });
+  }
+
+  // Initialize
+  setupAccordion();
+
+  // For Astro View Transitions
+  document.addEventListener('astro:page-load', setupAccordion);
+</script>
+
+<style>
+  /* Custom styles for the accordion body */
+  :global(.accordion-content) {
+      font-weight: 500;
+  }
+  :global(.accordion-content a) {
+    color: var(--color-magenta);
+    text-decoration-line: underline;
+    text-underline-offset: 4px;
+    font-weight: 700;
+  }
+  :global(.accordion-content a:hover) {
+    opacity: 0.8;
+  }
+  :global(.accordion-content p) {
+    margin-bottom: 1.5rem;
+  }
+  :global(.accordion-content ul, .accordion-content ol) {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+  :global(.accordion-content li) {
+    margin-bottom: 0.5rem;
+  }
+  :global(.accordion-content strong) {
+    color: white;
+    font-weight: 700;
+  }
+  :global(.accordion-content h1, .accordion-content h2, .accordion-content h3) {
+      color: white;
+      font-family: var(--font-display);
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+  }
+  :global(.accordion-content img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: 1rem;
+      margin: 1.5rem 0;
+  }
+</style>

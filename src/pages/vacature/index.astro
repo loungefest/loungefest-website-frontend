@@ -1,0 +1,53 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { vacatures } from '../../data/vacatures';
+import Button from '../../components/ui/Button.astro';
+---
+
+<Layout>
+    <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
+        <img
+            src="/images/lf-hero.jpg"
+            alt="Vacatures Hero"
+            class="absolute inset-0 h-full w-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/30"></div>
+    </section>
+
+    <section class="bg-sand py-24 text-plum">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <h1 class="text-center font-display text-7xl md:text-8xl font-bold mb-20 tracking-tight text-plum">
+                Vacatures
+            </h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-x-12 md:gap-y-20">
+                {vacatures.map((vacature) => (
+                    <div class="group vacature-card flex flex-col h-full bg-white rounded-[2.5rem] overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-2">
+                        <div class="p-8 flex flex-col flex-grow">
+                            <h3 class="font-display text-3xl font-bold text-plum mb-4 leading-tight">
+                                {vacature.title}
+                            </h3>
+                            <p class="text-lg text-plum-700 mb-8 flex-grow leading-relaxed">
+                                {vacature.description}
+                            </p>
+                            <div class="mt-auto">
+                                <Button href={`/vacature/${vacature.slug}`} variant="primary" size="md" class="w-full">
+                                    Bekijk vacature
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div class="mt-24 text-center">
+                <p class="text-2xl font-bold text-plum mb-8">
+                    Staat jouw droomrol er niet tussen, maar wil je wel helpen?
+                </p>
+                <Button href="mailto:info@loungefest.nl" variant="outline" color="midnight" size="lg">
+                    Stuur een open sollicitatie
+                </Button>
+            </div>
+        </div>
+    </section>
+</Layout>

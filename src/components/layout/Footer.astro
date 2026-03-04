@@ -16,36 +16,51 @@ import Button from '../ui/Button.astro';
         </div>
 
         <!-- Links Columns -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-12 md:gap-24">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-24">
+            <!-- Navigatie -->
+            <div class="flex flex-col gap-6">
+                <h3 class="font-display font-bold text-2xl uppercase tracking-wider">Navigatie</h3>
+                <ul class="flex flex-col gap-4">
+                    <li><a href="/programma" class="font-sans text-lg hover:opacity-70 transition-opacity">Programma</a></li>
+                    <li><a href="/sponsors" class="font-sans text-lg hover:opacity-70 transition-opacity">Sponsors</a></li>
+                    <li><a href="/ploegen" class="font-sans text-lg hover:opacity-70 transition-opacity">Ploegen</a></li>
+                    <li><a href="/edities" class="font-sans text-lg hover:opacity-70 transition-opacity">Edities</a></li>
+                    <li><a href="/info" class="font-sans text-lg hover:opacity-70 transition-opacity">Info</a></li>
+                    <li><a href="/vacature" class="font-sans text-lg hover:opacity-70 transition-opacity">Vacatures</a></li>
+                    <li><a href="https://www.noordwijk.info/cultuur" target="_blank" rel="noopener noreferrer" class="font-sans text-lg hover:opacity-70 transition-opacity">Noordwijk cultuur</a></li>
+                </ul>
+            </div>
+
             <!-- Contact -->
             <div class="flex flex-col gap-6">
                 <h3 class="font-display font-bold text-2xl uppercase tracking-wider">Contact</h3>
-                <a href="mailto:info@loungefest.nl" class="font-sans text-lg hover:opacity-70 transition-opacity">info@loungefest.nl</a>
+                <ul class="flex flex-col gap-4">
+                    <li><a href="mailto:info@loungefest.nl" class="font-sans text-lg hover:opacity-70 transition-opacity">info@loungefest.nl</a></li>
+                    <li><a href="tel:0628883981" class="font-sans text-lg hover:opacity-70 transition-opacity">06-2888 3981</a></li>
+                </ul>
             </div>
 
             <!-- Socials -->
             <div class="flex flex-col gap-6">
                 <h3 class="font-display font-bold text-2xl uppercase tracking-wider">Socials</h3>
                 <ul class="flex flex-col gap-4">
-                    <li><a href="https://instagram.com" class="font-sans text-lg hover:opacity-70 transition-opacity">Instagram</a></li>
-                    <li><a href="https://facebook.com" class="font-sans text-lg hover:opacity-70 transition-opacity">Facebook</a></li>
-                    <li><a href="https://spotify.com" class="font-sans text-lg hover:opacity-70 transition-opacity">Spotify</a></li>
+                    <li><a href="https://www.instagram.com/loungefest.nl/" target="_blank" rel="noopener noreferrer" class="font-sans text-lg hover:opacity-70 transition-opacity">Instagram</a></li>
+                    <li><a href="https://www.facebook.com/loungefestnwh/" target="_blank" rel="noopener noreferrer" class="font-sans text-lg hover:opacity-70 transition-opacity">Facebook</a></li>
+                    <li><a href="https://spotify.com" target="_blank" rel="noopener noreferrer" class="font-sans text-lg hover:opacity-70 transition-opacity">Spotify</a></li>
                 </ul>
             </div>
 
-            <!-- Nieuws -->
-            <div class="flex flex-col gap-6">
-                <h3 class="font-display font-bold text-2xl uppercase tracking-wider">Nieuws</h3>
-                <ul class="flex flex-col gap-8">
-                    <li><a href="/nieuwsbrief" class="font-sans text-lg hover:opacity-70 transition-opacity">Nieuwsbrief</a></li>
-                    <li>
-                        <Button href="/tickets" variant="outline" size="lg">
-                            Tickets kopen
-                        </Button>
-                    </li>
-                </ul>
+            <div>
+                <Button href="/tickets" variant="outline" size="lg">
+                    Tickets kopen
+                </Button>
             </div>
         </div>
+    </div>
+
+    <!-- Copyright Section -->
+    <div class="max-w-7xl mx-auto mt-24 pt-8 border-t border-white/20 relative z-10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/60 font-sans">
+        <p>Copyright © 2024 Stichting NYCE</p>
     </div>
 </footer>
 

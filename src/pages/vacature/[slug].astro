@@ -1,0 +1,108 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { vacatures } from '../../data/vacatures';
+import Button from '../../components/ui/Button.astro';
+
+export function getStaticPaths() {
+    return vacatures.map((vacature) => ({
+        params: { slug: vacature.slug },
+        props: { vacature },
+    }));
+}
+
+const { vacature } = Astro.props;
+---
+
+<Layout>
+    <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
+        <img
+            src="/images/lf-hero.jpg"
+            alt={vacature.title}
+            class="absolute inset-0 h-full w-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/30"></div>
+    </section>
+
+    <section class="bg-sand py-24 text-plum min-h-screen">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <div class="mb-12">
+                <a href="/vacature" class="text-plum-600 font-bold flex items-center gap-2 hover:text-magenta transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    Terug naar vacatures
+                </a>
+            </div>
+
+            <h1 class="font-display text-5xl md:text-7xl font-bold mb-8 tracking-tight text-plum">
+                {vacature.title}
+            </h1>
+
+            <div class="prose prose-xl prose-plum max-w-none">
+                <p class="text-2xl font-medium leading-relaxed mb-12">
+                    {vacature.intro}
+                </p>
+
+                <div class="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl mb-12">
+                    <h2 class="font-display text-4xl font-bold mb-6 text-plum">WAT GA JE DOEN?</h2>
+                    <ul class="list-none space-y-4 mb-8">
+                        {vacature.whatYouDo.map((item) => (
+                            <li class="flex items-start gap-4 text-lg">
+                                <span class="text-magenta text-2xl">•</span>
+                                <span>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                    {vacature.extraInfo && (
+                        <p class="text-lg italic text-plum-700">
+                            {vacature.extraInfo}
+                        </p>
+                    )}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-plum text-white rounded-[2.5rem] p-8 md:p-12 shadow-xl">
+                        <h2 class="font-display text-3xl font-bold mb-6 text-magenta">WIE BEN JIJ?</h2>
+                        <ul class="list-none space-y-4">
+                            {vacature.whoYouAre.map((item) => (
+                                <li class="flex items-start gap-4 text-lg">
+                                    <span class="text-magenta text-2xl">•</span>
+                                    <span>{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div class="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border-4 border-plum/10">
+                        <h2 class="font-display text-3xl font-bold mb-6 text-plum">WAT KRIJG JE?</h2>
+                        <ul class="list-none space-y-4">
+                            {vacature.whatYouGet.map((item) => (
+                                <li class="flex items-start gap-4 text-lg">
+                                    <span class="text-magenta text-2xl">•</span>
+                                    <span>{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-magenta text-white rounded-[2.5rem] p-8 md:p-12 shadow-xl text-center">
+                    <h2 class="font-display text-4xl font-bold mb-6">INTERESSE?</h2>
+                    <p class="text-xl mb-8 leading-relaxed">
+                        {vacature.interestText}
+                    </p>
+                    <div class="flex flex-col md:flex-row justify-center gap-4">
+                        <Button href={`mailto:${vacature.contactEmail}`} variant="outline" size="lg">
+                            Email {vacature.contactName}
+                        </Button>
+                        {vacature.contactPhone && (
+                            <Button href={`tel:${vacature.contactPhone.replace(/-/g, '')}`} variant="outline" size="lg">
+                                Bel {vacature.contactPhone}
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</Layout>

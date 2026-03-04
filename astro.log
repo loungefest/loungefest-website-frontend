@@ -1,15 +1,17 @@
 
 > loungefest-website-frontend@0.0.1 dev
-> astro dev
+> astro dev --port 4321
 
-15:15:32 [types] Generated 1ms
-15:15:32 [content] Syncing content
-15:15:32 [content] Synced content
-15:15:32 [vite] Port 4321 is in use, trying another one...
+16:02:17 [types] Generated 0ms
+16:02:17 [content] Syncing content
+16:02:17 [content] Synced content
+16:02:17 [vite] Port 4321 is in use, trying another one...
+16:02:17 [vite] Port 4322 is in use, trying another one...
+16:02:17 [vite] Port 4323 is in use, trying another one...
 
- astro  v5.17.3 ready in 271 ms
+ astro  v5.17.3 ready in 275 ms
 
-┃ Local    http://localhost:4322/
+┃ Local    http://localhost:4324/
 ┃ Network  use --host to expose
 
-15:15:32 watching for file changes...
+16:02:17 watching for file changes...

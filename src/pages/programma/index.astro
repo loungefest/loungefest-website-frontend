@@ -1,0 +1,92 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Button from '../../components/ui/Button.astro';
+import { artists } from '../../data/artists';
+---
+
+<Layout>
+    <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
+        <img
+            src="/images/lf-hero.jpg"
+            alt="Programma Hero"
+            class="absolute inset-0 h-full w-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/30"></div>
+    </section>
+
+    <section class="bg-midnight py-24 text-white min-h-screen">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <h1 class="text-center font-display text-7xl md:text-8xl font-bold mb-16 tracking-tight">
+                Programma
+            </h1>
+
+            <div class="flex justify-center gap-4 mb-20" id="filter-buttons">
+                <Button variant="sky" size="md" data-filter="all">Alles</Button>
+                <Button variant="outline" size="md" data-filter="Vrijdag">Vrijdag</Button>
+                <Button variant="outline" size="md" data-filter="Zaterdag">Zaterdag</Button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-x-12 md:gap-y-16">
+                {artists.map((artist) => (
+                    <a href={`/programma/${artist.slug}`} class="group artist-card block" data-day={artist.day}>
+                        <div class="aspect-square overflow-hidden rounded-[2.5rem] mb-6 bg-plum-800 shadow-xl">
+                            <img
+                                src={artist.image}
+                                alt={artist.name}
+                                class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                        </div>
+                        <h3 class="font-display text-3xl font-bold text-sky mb-1 leading-tight group-hover:text-magenta transition-colors">
+                            {artist.name}
+                        </h3>
+                        <p class="text-xl font-medium text-white/80">
+                            {artist.day} - {artist.time}
+                        </p>
+                    </a>
+                ))}
+            </div>
+        </div>
+    </section>
+</Layout>
+
+<script>
+    const setupFilters = () => {
+        const filterButtons = document.querySelectorAll('#filter-buttons [data-filter]');
+        const artistCards = document.querySelectorAll('.artist-card');
+
+        // Classes to swap for button states
+        const activeClasses = ['bg-sky', 'hover:shadow-sky/20', 'hover:scale-105', 'shadow-xl'];
+        const inactiveClasses = ['border-2', 'border-white', 'hover:bg-white', 'hover:text-plum'];
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.getAttribute('data-filter');
+
+                // Update button styles
+                filterButtons.forEach(btn => {
+                    if (btn === button) {
+                        btn.classList.add(...activeClasses);
+                        btn.classList.remove(...inactiveClasses);
+                    } else {
+                        btn.classList.remove(...activeClasses);
+                        btn.classList.add(...inactiveClasses);
+                    }
+                });
+
+                // Filter artists
+                artistCards.forEach(card => {
+                    if (filter === 'all' || card.getAttribute('data-day') === filter) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    };
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', setupFilters);
+    // Also run on astro:page-load if using View Transitions
+    document.addEventListener('astro:page-load', setupFilters);
+</script>

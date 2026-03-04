@@ -95,7 +95,7 @@ const sizes = {
     xl: 'px-12 py-4 text-2xl'
 };
 
-const baseStyles = 'inline-block font-display font-bold rounded-full transition-all duration-300 text-center';
+const baseStyles = 'inline-block font-display font-bold rounded-full transition-all duration-300 text-center cursor-pointer';
 const elementStyles = [baseStyles, (variants as any)[effectiveVariant] || variants.solid, sizes[size], className].join(' ');
 
 const Element = href ? 'a' : 'button';
