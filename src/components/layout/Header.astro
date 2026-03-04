@@ -3,7 +3,8 @@ import LoungefestIcon from '../logo/LoungefestIcon.astro';
 import LavaLamp from '../visuals/LavaLamp.astro';
 import Button from '../ui/Button.astro';
 
-const base = import.meta.env.BASE_URL;
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
 
 <header id="main-header" class="bg-plum text-white px-8 h-24 flex items-center justify-between shadow-lg fixed top-0 left-0 right-0 z-50 transition-transform duration-300">

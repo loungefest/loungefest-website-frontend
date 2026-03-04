@@ -12,6 +12,9 @@ export function getStaticPaths() {
 }
 
 const { artist } = Astro.props;
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
 
 <Layout>
@@ -28,7 +31,7 @@ const { artist } = Astro.props;
     <section class="bg-midnight py-24 text-white min-h-screen">
         <div class="container mx-auto px-4 max-w-6xl">
             <div class="mb-12">
-                <a href={`${import.meta.env.BASE_URL}programma`} class="text-sky font-bold flex items-center gap-2 hover:text-magenta transition-colors w-fit">
+                <a href={`${base}programma`} class="text-sky font-bold flex items-center gap-2 hover:text-magenta transition-colors w-fit">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                     </svg>

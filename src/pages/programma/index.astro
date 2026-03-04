@@ -4,6 +4,9 @@ import Button from '../../components/ui/Button.astro';
 import { artists } from '../../data/artists';
 import { Image } from 'astro:assets';
 import heroImage from '../../assets/images/lf-hero.jpg';
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
 
 <Layout>
@@ -31,7 +34,7 @@ import heroImage from '../../assets/images/lf-hero.jpg';
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-x-12 md:gap-y-16">
                 {artists.map((artist) => (
-                    <a href={`${import.meta.env.BASE_URL}programma/${artist.slug}`} class="group artist-card block" data-day={artist.day}>
+                    <a href={`${base}programma/${artist.slug}`} class="group artist-card block" data-day={artist.day}>
                         <div class="aspect-square overflow-hidden rounded-[2.5rem] mb-6 bg-plum-800 shadow-xl">
                             <Image
                                 src={artist.image}
