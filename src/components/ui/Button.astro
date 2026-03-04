@@ -1,0 +1,42 @@
+---
+interface Props {
+	href?: string;
+	variant?: 'primary' | 'outline';
+	size?: 'sm' | 'md' | 'lg' | 'xl';
+	class?: string;
+	[key: string]: any;
+}
+
+const {
+    href,
+    variant = 'primary',
+    size = 'md',
+    class: className,
+    ...rest
+} = Astro.props;
+
+const variants = {
+    primary: 'bg-lime text-plum hover:scale-105 shadow-xl hover:shadow-lime/20',
+    outline: 'border-2 border-white text-white hover:bg-white hover:text-plum',
+    magenta: 'bg-magenta text-white hover:scale-105 shadow-xl hover:shadow-magenta/20',
+    plum: 'bg-plum text-white hover:scale-105 shadow-xl hover:shadow-plum/20',
+    ghost: 'hover:bg-white/10 text-white'
+};
+
+const sizes = {
+    sm: 'px-4 py-1 text-base',
+    md: 'px-6 py-1.5 text-xl',
+    lg: 'px-8 py-2 text-xl',
+    xl: 'px-12 py-4 text-2xl'
+};
+
+const baseStyles = 'inline-block font-display font-bold rounded-full transition-all duration-300 text-center';
+const elementStyles = [baseStyles, variants[variant], sizes[size], className].join(' ');
+
+const Element = href ? 'a' : 'button';
+const typeAttribute = Element === 'button' ? { type: rest.type || 'button' } : {};
+---
+
+<Element href={href} class={elementStyles} {...typeAttribute} {...rest}>
+    <slot />
+</Element>

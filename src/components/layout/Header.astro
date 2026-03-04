@@ -1,0 +1,124 @@
+---
+import LoungefestIcon from '../logo/LoungefestIcon.astro';
+import LavaLamp from '../visuals/LavaLamp.astro';
+import Button from '../ui/Button.astro';
+---
+
+<header id="main-header" class="bg-plum text-white px-8 h-24 flex items-center justify-between shadow-lg fixed top-0 left-0 right-0 z-50 transition-transform duration-300">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <LavaLamp color="magenta" ballSize={10} numBalls={20} />
+    </div>
+    <div class="flex items-center gap-10 relative z-10">
+        <a href="/" class="flex items-center transition-transform hover:scale-105 duration-300">
+            <LoungefestIcon class="h-10 w-10" aria-label="Loungefest Logo" />
+        </a>
+    </div>
+
+    <!-- Hamburger Menu Button -->
+    <button id="menu-toggle" class="lg:hidden relative z-50 p-2 text-white hover:text-magenta-100 transition-colors cursor-pointer" aria-label="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-10 h-10 pointer-events-none">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+    </button>
+
+    <nav class="hidden lg:block relative z-10">
+        <ul class="flex gap-10 font-display font-bold text-2xl">
+            <li><a href="/" class="hover:opacity-80 transition-opacity font-bold">Home</a></li>
+            <li><a href="/programma" class="hover:opacity-80 transition-opacity font-bold">Programma</a></li>
+            <li><a href="/tickets" class="hover:opacity-80 transition-opacity font-bold">Tickets</a></li>
+            <li><a href="/sponsors" class="hover:opacity-80 transition-opacity font-bold">Sponsors</a></li>
+            <li><a href="/over-ons" class="hover:opacity-80 transition-opacity font-bold">Over ons</a></li>
+            <li><a href="/info" class="hover:opacity-80 transition-opacity font-bold">Info</a></li>
+        </ul>
+    </nav>
+
+    <div class="hidden lg:block">
+        <Button href="/tickets" variant="outline" size="md" class="relative z-10">
+            Tickets kopen
+        </Button>
+    </div>
+</header>
+
+<!-- Mobile Menu Overlay -->
+<div id="mobile-menu" class="fixed inset-0 bg-plum z-60 transform translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
+    <div class="flex flex-col h-full p-8 pt-32 relative overflow-hidden text-white">
+        <!-- Icon in Menu -->
+        <a href="/" class="absolute top-5 left-8 flex items-center transition-transform hover:scale-105 duration-300 z-10">
+            <LoungefestIcon class="h-10 w-10" aria-label="Loungefest Logo" />
+        </a>
+        <!-- Close Menu Button (Visible in Menu) -->
+        <button id="close-menu" class="absolute top-5 right-8 p-2 text-white hover:text-magenta-100 transition-colors cursor-pointer" aria-label="Close menu">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-10 h-10 pointer-events-none">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <!--<LavaLamp color="magenta" ballSize={15} numBalls={15} />-->
+
+        <nav class="relative z-10">
+            <ul class="flex flex-col gap-6 font-display font-bold text-4xl">
+                <li><a href="/" class="hover:text-magenta transition-colors">Home</a></li>
+                <li><a href="/programma" class="hover:text-magenta transition-colors">Programma</a></li>
+                <li><a href="/tickets" class="hover:text-magenta transition-colors">Tickets</a></li>
+                <li><a href="/sponsors" class="hover:text-magenta transition-colors">Sponsors</a></li>
+                <li><a href="/over-ons" class="hover:text-magenta transition-colors">Over ons</a></li>
+                <li><a href="/info" class="hover:text-magenta transition-colors">Info</a></li>
+            </ul>
+        </nav>
+
+        <div class="mt-12 relative z-10">
+            <Button href="/tickets" variant="outline" size="xl" class="w-full">
+                Tickets kopen
+            </Button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const closeMenu = document.getElementById('close-menu');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const header = document.getElementById('main-header');
+
+    let isMenuOpen = false;
+    let lastScrollY = window.scrollY;
+    const headerHeight = 96; // h-24 = 24 * 4px = 96px
+
+    const toggleMenu = () => {
+        isMenuOpen = !isMenuOpen;
+
+        if (isMenuOpen) {
+            mobileMenu?.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
+        } else {
+            mobileMenu?.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+    };
+
+    window.addEventListener('scroll', () => {
+        if (!header || isMenuOpen) return;
+
+        const currentScrollY = window.scrollY;
+
+        if (currentScrollY > lastScrollY && currentScrollY > headerHeight + 50) {
+            // Scrolling down and past threshold
+            header.style.transform = 'translateY(-100%)';
+        } else {
+            // Scrolling up
+            header.style.transform = 'translateY(0)';
+        }
+
+        lastScrollY = currentScrollY;
+    });
+
+    menuToggle?.addEventListener('click', toggleMenu);
+    closeMenu?.addEventListener('click', toggleMenu);
+
+    // Close menu when clicking on a link
+    const mobileLinks = mobileMenu?.querySelectorAll('a');
+    mobileLinks?.forEach(link => {
+        link.addEventListener('click', () => {
+            if (isMenuOpen) toggleMenu();
+        });
+    });
+</script>

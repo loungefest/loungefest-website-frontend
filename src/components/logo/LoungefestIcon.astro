@@ -1,0 +1,42 @@
+---
+import rawSvg from '../../assets/loungefest-icon.svg?raw';
+
+interface Props {
+	color?: string;
+	class?: string;
+	[key: string]: any;
+}
+
+const { color, class: className, ...rest } = Astro.props;
+
+// Helper to resolve color names (like 'plum') to Tailwind theme colors
+const resolveColor = (val: string) => {
+	if (!val || val === 'currentColor' || val.startsWith('#') || val.startsWith('var(') || val.startsWith('rgb') || val.startsWith('hsl')) {
+		return val;
+	}
+	return `var(--color-${val}, ${val})`;
+};
+
+const resolvedColor = color ? resolveColor(color) : undefined;
+
+// Ensure responsive sizing by replacing fixed dimensions with 100%
+const svg = rawSvg
+	.replace(/width="[0-9.]+"/, 'width="100%"')
+	.replace(/height="[0-9.]+"/, 'height="100%"');
+---
+
+<span
+	class:list={['inline-block loungefest-icon-container', className]}
+	style={{ color: resolvedColor }}
+	role="img"
+	{...rest}
+	set:html={svg}
+/>
+
+<style is:global>
+	.loungefest-icon-container svg {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+</style>
