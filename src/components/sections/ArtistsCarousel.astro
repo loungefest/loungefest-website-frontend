@@ -1,19 +1,22 @@
 ---
+import { Image } from 'astro:assets';
+import heroImage from '../../assets/images/lf-hero.jpg';
+
 const artists = [
-    { name: 'Prins S. en De Geit', image: '/images/lf-hero.jpg' },
-    { name: 'Goldband', image: '/images/lf-hero.jpg' },
-    { name: 'Froukje', image: '/images/lf-hero.jpg' },
-    { name: 'Joost', image: '/images/lf-hero.jpg' },
-    { name: 'Sophie Straat', image: '/images/lf-hero.jpg' },
-    { name: 'New Artist', image: '/images/lf-hero.jpg' },
-    { name: 'Another Artist', image: '/images/lf-hero.jpg' },
-    { name: 'Yet Another Artist', image: '/images/lf-hero.jpg' },
-    { name: 'Even More Artist', image: '/images/lf-hero.jpg' },
-    { name: 'And Another One', image: '/images/lf-hero.jpg' },
-    { name: 'Final Artist', image: '/images/lf-hero.jpg' },
-    { name: 'Last Artist', image: '/images/lf-hero.jpg' },
-    { name: 'Extra Artist', image: '/images/lf-hero.jpg' },
-    { name: 'Additional Artist', image: '/images/lf-hero.jpg' },
+    { name: 'Prins S. en De Geit', image: heroImage },
+    { name: 'Goldband', image: heroImage },
+    { name: 'Froukje', image: heroImage },
+    { name: 'Joost', image: heroImage },
+    { name: 'Sophie Straat', image: heroImage },
+    { name: 'New Artist', image: heroImage },
+    { name: 'Another Artist', image: heroImage },
+    { name: 'Yet Another Artist', image: heroImage },
+    { name: 'Even More Artist', image: heroImage },
+    { name: 'And Another One', image: heroImage },
+    { name: 'Final Artist', image: heroImage },
+    { name: 'Last Artist', image: heroImage },
+    { name: 'Extra Artist', image: heroImage },
+    { name: 'Additional Artist', image: heroImage },
 ];
 ---
 
@@ -25,7 +28,7 @@ const artists = [
                 {artists.map((artist) => (
                     <div class="swiper-slide">
                         <div class="group relative aspect-square overflow-hidden rounded-[2rem] bg-plum-800 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl">
-                            <img
+                            <Image
                                 src={artist.image}
                                 alt={artist.name}
                                 class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"

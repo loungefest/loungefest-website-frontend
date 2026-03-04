@@ -2,6 +2,8 @@
 import Layout from '../../layouts/Layout.astro';
 import { vacatures } from '../../data/vacatures';
 import Button from '../../components/ui/Button.astro';
+import { Image } from 'astro:assets';
+import heroImage from '../../assets/images/lf-hero.jpg';
 
 export function getStaticPaths() {
     return vacatures.map((vacature) => ({
@@ -15,10 +17,11 @@ const { vacature } = Astro.props;
 
 <Layout>
     <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
-        <img
-            src="/images/lf-hero.jpg"
+        <Image
+            src={heroImage}
             alt={vacature.title}
             class="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
         />
         <div class="absolute inset-0 bg-black/30"></div>
     </section>

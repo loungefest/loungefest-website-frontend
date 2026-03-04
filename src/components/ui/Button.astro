@@ -9,13 +9,18 @@ interface Props {
 }
 
 const {
-    href,
+    href: rawHref,
     variant = 'primary',
     color: colorProp,
     size = 'md',
     class: className,
     ...rest
 } = Astro.props;
+
+// Automatically prefix absolute internal links with BASE_URL for subfolder hosting (GH Pages)
+const href = rawHref?.startsWith('/') && !rawHref.startsWith('//')
+    ? `${import.meta.env.BASE_URL}${rawHref.slice(1)}`
+    : rawHref;
 
 const themeColors = ['sky', 'midnight', 'plum', 'magenta', 'sand', 'lime', 'bronze', 'white'];
 

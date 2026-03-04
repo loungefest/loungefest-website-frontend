@@ -9,9 +9,21 @@
 16:02:17 [vite] Port 4322 is in use, trying another one...
 16:02:17 [vite] Port 4323 is in use, trying another one...
 
- astro  v5.17.3 ready in 275 ms
-
-┃ Local    http://localhost:4324/
-┃ Network  use --host to expose
-
-16:02:17 watching for file changes...
+ astro  v5.117:24:25 Configuration file updated. Restarting...
+17:24:25 [vite] Re-optimizing dependencies because vite config has changed
+17:24:25 [content] Syncing content
+17:24:25 [content] Astro config changed
+17:24:25 [content] Clearing content store
+17:24:25 [content] Synced content
+17:24:25 [types] Generated 178ms
+17:24:25 [vite] Re-optimizing dependencies because vite config has changed
+17:24:25 [vite] Port 4321 is in use, trying another one...
+17:28:51 Configuration file updated. Restarting...
+17:28:51 [vite] Re-optimizing dependencies because vite config has changed
+17:28:51 [content] Syncing content
+17:28:51 [content] Astro config changed
+17:28:51 [content] Clearing content store
+17:28:51 [content] Synced content
+17:28:51 [types] Generated 158ms
+17:28:51 [vite] Re-optimizing dependencies because vite config has changed
+17:28:51 [vite] Port 4321 is in use, trying another one...

@@ -2,14 +2,17 @@
 import Layout from '../../layouts/Layout.astro';
 import { vacatures } from '../../data/vacatures';
 import Button from '../../components/ui/Button.astro';
+import { Image } from 'astro:assets';
+import heroImage from '../../assets/images/lf-hero.jpg';
 ---
 
 <Layout>
     <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
-        <img
-            src="/images/lf-hero.jpg"
+        <Image
+            src={heroImage}
             alt="Vacatures Hero"
             class="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
         />
         <div class="absolute inset-0 bg-black/30"></div>
     </section>

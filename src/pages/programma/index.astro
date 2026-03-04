@@ -2,14 +2,17 @@
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import { artists } from '../../data/artists';
+import { Image } from 'astro:assets';
+import heroImage from '../../assets/images/lf-hero.jpg';
 ---
 
 <Layout>
     <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
-        <img
-            src="/images/lf-hero.jpg"
+        <Image
+            src={heroImage}
             alt="Programma Hero"
             class="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
         />
         <div class="absolute inset-0 bg-black/30"></div>
     </section>
@@ -30,7 +33,7 @@ import { artists } from '../../data/artists';
                 {artists.map((artist) => (
                     <a href={`/programma/${artist.slug}`} class="group artist-card block" data-day={artist.day}>
                         <div class="aspect-square overflow-hidden rounded-[2.5rem] mb-6 bg-plum-800 shadow-xl">
-                            <img
+                            <Image
                                 src={artist.image}
                                 alt={artist.name}
                                 class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"

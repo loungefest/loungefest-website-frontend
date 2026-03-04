@@ -1,21 +1,23 @@
 ---
 import Button from '../ui/Button.astro';
+import { Image } from 'astro:assets';
+import heroImage from '../../assets/images/lf-hero.jpg';
 
 const podia = [
     {
         name: 'Adanses',
         description: 'Hier komt een stukje tekst over het Adanses podium. Wat voor soort muziekgenre hier gespeeld gaat worden.',
-        image: '/images/lf-hero.jpg',
+        image: heroImage,
     },
     {
         name: 'Lakeside',
         description: 'Geniet van relaxte beats met uitzicht op het water. De perfecte plek om even helemaal tot rust te komen.',
-        image: '/images/lf-hero.jpg',
+        image: heroImage,
     },
     {
         name: 'The Forest',
         description: 'Verscholen tussen de bomen vind je de meest verrassende acts en een magische sfeer.',
-        image: '/images/lf-hero.jpg',
+        image: heroImage,
     }
 ];
 ---
@@ -41,7 +43,7 @@ const podia = [
 
                         <div class="relative group max-w-md mx-auto mb-12">
                             <div class="aspect-square overflow-hidden rounded-[3rem] shadow-2xl">
-                                <img
+                                <Image
                                     src={podium.image}
                                     alt={podium.name}
                                     class="h-full w-full object-cover"

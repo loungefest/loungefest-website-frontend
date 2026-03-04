@@ -1,15 +1,18 @@
 ---
+import { Image } from 'astro:assets';
 import LoungefestLogoBlock from '../logo/LoungefestLogoBlock.astro';
 import Button from '../ui/Button.astro';
+import heroImage from '../../assets/images/lf-hero.jpg';
 ---
 
 <section class="relative min-h-[calc(100vh-6rem)] flex items-center justify-center overflow-hidden py-16">
     <!-- Background Image -->
     <div class="absolute inset-0 z-0">
-        <img
-            src="/images/lf-hero.jpg"
+        <Image
+            src={heroImage}
             alt="Loungefest Hero Background"
             class="w-full h-full object-cover"
+            loading="eager"
         />
         <!-- Slightly darken the background to ensure text readability -->
         <div class="absolute inset-0 bg-black/10"></div>
