@@ -27,3 +27,21 @@
 17:28:51 [types] Generated 158ms
 17:28:51 [vite] Re-optimizing dependencies because vite config has changed
 17:28:51 [vite] Port 4321 is in use, trying another one...
+17:34:11 Configuration file updated. Restarting...
+17:34:11 [vite] Re-optimizing dependencies because vite config has changed
+17:34:11 [content] Syncing content
+17:34:11 [content] Astro config changed
+17:34:11 [content] Clearing content store
+17:34:11 [content] Synced content
+17:34:11 [types] Generated 247ms
+17:34:11 [vite] Re-optimizing dependencies because vite config has changed
+17:34:11 [vite] Port 4321 is in use, trying another one...
+17:40:59 Configuration file updated. Restarting...
+17:40:59 [vite] Re-optimizing dependencies because vite config has changed
+17:40:59 [content] Syncing content
+17:40:59 [content] Astro config changed
+17:40:59 [content] Clearing content store
+17:40:59 [content] Synced content
+17:40:59 [types] Generated 111ms
+17:40:59 [vite] Re-optimizing dependencies because vite config has changed
+17:40:59 [vite] Port 4321 is in use, trying another one...
