@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { artists } from '../../data/artists';
 import Button from '../../components/ui/Button.astro';
+import TicketsCTA from '../../components/sections/TicketsCTA.astro';
 import { Image } from 'astro:assets';
 
 export function getStaticPaths() {
@@ -101,4 +102,5 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
             </div>
         </div>
     </section>
+    <TicketsCTA variant="lime" />
 </Layout>

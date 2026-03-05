@@ -3,16 +3,29 @@ interface Props {
     color?: string;
     numBalls?: number;
     ballSize?: number;
+    animated?: boolean;
+    overflow?: number;
+    responsive?: boolean;
 }
 
 const {
     color = '#6b0f54',
     numBalls = 6,
     ballSize = 1,
+    animated = true,
+    overflow,
+    responsive = false,
 } = Astro.props;
 ---
 
-<div class="lavalamp-container" data-color={color} data-num-balls={numBalls} data-ball-size={ballSize}>
+<div class="lavalamp-container" 
+    data-color={color} 
+    data-num-balls={numBalls} 
+    data-ball-size={ballSize} 
+    data-animated={animated.toString()} 
+    data-overflow={overflow !== undefined ? overflow.toString() : undefined}
+    data-responsive={responsive.toString()}
+>
     <canvas class="lavalamp-canvas"></canvas>
 </div>
 
@@ -27,122 +40,117 @@ const {
     .lavalamp-canvas {
         display: block;
         position: absolute;
+        will-change: contents;
     }
 </style>
 
 <script>
-    class Point {
-        x: number;
-        y: number;
-        magnitude: number;
-        computed: number;
-        force: number;
-
-        constructor(x: number, y: number) {
-            this.x = x;
-            this.y = y;
-            this.magnitude = x * x + y * y;
-            this.computed = 0;
-            this.force = 0;
-        }
-
-        add(p: Point): Point {
-            return new Point(this.x + p.x, this.y + p.y);
-        }
-    }
+    // ── Ball (flat fields, no Point allocation on move) ──────────────
+    const BASE_BALL_UNIT = 20;
 
     class Ball {
-        vel: Point;
-        pos: Point;
+        posX: number;
+        posY: number;
+        velX: number;
+        velY: number;
         size: number;
+        sizeSquared: number;
         width: number;
         height: number;
 
-        constructor(parent: { width: number; height: number; wh: number; ballSize: number }) {
+        constructor(parent: { width: number; height: number; ballSize: number }) {
             const min = 0.1;
             const max = 1.5;
-            this.size = ((parent.wh / 15) + (Math.random() * (max - min) + min) * (parent.wh / 15)) * parent.ballSize;
-            this.vel = new Point(
-                (Math.random() > 0.5 ? 1 : -1) * (0.2 + Math.random() * 0.25),
-                (Math.random() > 0.5 ? 1 : -1) * (0.2 + Math.random())
-            );
-            this.pos = new Point(
-                this.size + Math.random() * (parent.width - this.size * 2),
-                this.size + Math.random() * (parent.height - this.size * 2)
-            );
+            this.size = (BASE_BALL_UNIT + (Math.random() * (max - min) + min) * BASE_BALL_UNIT) * parent.ballSize;
+            this.sizeSquared = this.size * this.size;
+            this.velX = (Math.random() > 0.5 ? 1 : -1) * (0.2 + Math.random() * 0.25);
+            this.velY = (Math.random() > 0.5 ? 1 : -1) * (0.2 + Math.random());
+            this.posX = this.size + Math.random() * (parent.width - this.size * 2);
+            this.posY = this.size + Math.random() * (parent.height - this.size * 2);
             this.width = parent.width;
             this.height = parent.height;
         }
 
         move(): void {
-            if (this.pos.x >= this.width - this.size) {
-                if (this.vel.x > 0) this.vel.x = -this.vel.x;
-                this.pos.x = this.width - this.size;
-            } else if (this.pos.x <= this.size) {
-                if (this.vel.x < 0) this.vel.x = -this.vel.x;
-                this.pos.x = this.size;
+            if (this.posX >= this.width - this.size) {
+                if (this.velX > 0) this.velX = -this.velX;
+                this.posX = this.width - this.size;
+            } else if (this.posX <= this.size) {
+                if (this.velX < 0) this.velX = -this.velX;
+                this.posX = this.size;
             }
 
-            if (this.pos.y >= this.height - this.size) {
-                if (this.vel.y > 0) this.vel.y = -this.vel.y;
-                this.pos.y = this.height - this.size;
-            } else if (this.pos.y <= this.size) {
-                if (this.vel.y < 0) this.vel.y = -this.vel.y;
-                this.pos.y = this.size;
+            if (this.posY >= this.height - this.size) {
+                if (this.velY > 0) this.velY = -this.velY;
+                this.posY = this.height - this.size;
+            } else if (this.posY <= this.size) {
+                if (this.velY < 0) this.velY = -this.velY;
+                this.posY = this.size;
             }
 
-            this.pos = this.pos.add(this.vel);
+            this.posX += this.velX;
+            this.posY += this.velY;
         }
     }
 
+    // ── LavaLamp (typed arrays for grid, fewer allocations) ─────────
     class LavaLamp {
         step: number;
         width: number;
         height: number;
-        wh: number;
         ballSize: number;
         sx: number;
         sy: number;
         paint: boolean;
         metaFill: CanvasGradient;
-        plx: number[];
-        ply: number[];
-        mscases: number[];
-        ix: number[];
-        grid: Point[];
+        plx: Int8Array;
+        ply: Int8Array;
+        mscases: Int8Array;
+        ix: Int8Array;
+        // Flat typed arrays for grid data
+        gridX: Float64Array;
+        gridY: Float64Array;
+        gridMag: Float64Array;
+        gridForce: Float64Array;
+        gridComputed: Int32Array;
+        gridStride: number;
         balls: Ball[];
         iter: number;
         sign: number;
 
-        constructor(width: number, height: number, numBalls: number, color: string, ballSize: number, ctx: CanvasRenderingContext2D, visibleWidth?: number, visibleHeight?: number) {
+        constructor(width: number, height: number, numBalls: number, color: string, ballSize: number, ctx: CanvasRenderingContext2D) {
             this.step = 5;
             this.width = width;
             this.height = height;
-            // Use visible dimensions for ball sizing so balls scale correctly on narrow screens
-            const vw = visibleWidth ?? width;
-            const vh = visibleHeight ?? height;
-            this.wh = Math.min(vw, vh);
             this.ballSize = ballSize;
             this.sx = Math.floor(this.width / this.step);
             this.sy = Math.floor(this.height / this.step);
             this.paint = false;
             this.metaFill = this.createRadialGradient(width, height, width, color, ctx);
-            this.plx = [0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0];
-            this.ply = [0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1];
-            this.mscases = [0, 3, 0, 3, 1, 3, 0, 3, 2, 2, 0, 2, 1, 1, 0];
-            this.ix = [1, 0, -1, 0, 0, 1, 0, -1, -1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1];
-            this.grid = [];
-            this.balls = [];
+            this.plx = new Int8Array([0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0]);
+            this.ply = new Int8Array([0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]);
+            this.mscases = new Int8Array([0, 3, 0, 3, 1, 3, 0, 3, 2, 2, 0, 2, 1, 1, 0]);
+            this.ix = new Int8Array([1, 0, -1, 0, 0, 1, 0, -1, -1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1]);
             this.iter = 0;
             this.sign = 1;
 
-            for (let i = 0; i < (this.sx + 2) * (this.sy + 2); i++) {
-                this.grid[i] = new Point(
-                    (i % (this.sx + 2)) * this.step,
-                    Math.floor(i / (this.sx + 2)) * this.step
-                );
+            this.gridStride = this.sx + 2;
+            const gridLen = this.gridStride * (this.sy + 2);
+            this.gridX = new Float64Array(gridLen);
+            this.gridY = new Float64Array(gridLen);
+            this.gridMag = new Float64Array(gridLen);
+            this.gridForce = new Float64Array(gridLen);
+            this.gridComputed = new Int32Array(gridLen);
+
+            for (let i = 0; i < gridLen; i++) {
+                const gx = (i % this.gridStride) * this.step;
+                const gy = Math.floor(i / this.gridStride) * this.step;
+                this.gridX[i] = gx;
+                this.gridY[i] = gy;
+                this.gridMag[i] = gx * gx + gy * gy;
             }
 
+            this.balls = new Array(numBalls);
             for (let k = 0; k < numBalls; k++) {
                 this.balls[k] = new Ball(this);
             }
@@ -155,85 +163,90 @@ const {
             return gradient;
         }
 
-        computeForce(x: number, y: number, idx?: number): number {
+        computeForce(x: number, y: number, id: number): number {
             let force: number;
-            const id = idx ?? x + y * (this.sx + 2);
 
             if (x === 0 || y === 0 || x === this.sx || y === this.sy) {
                 force = 0.6 * this.sign;
             } else {
                 force = 0;
-                const cell = this.grid[id];
-                let i = 0;
-                let ball: Ball;
-                while ((ball = this.balls[i++])) {
-                    force += ball.size * ball.size / (-2 * cell.x * ball.pos.x - 2 * cell.y * ball.pos.y + ball.pos.magnitude + cell.magnitude);
+                const cx = this.gridX[id];
+                const cy = this.gridY[id];
+                const cm = this.gridMag[id];
+                const balls = this.balls;
+                for (let i = 0, len = balls.length; i < len; i++) {
+                    const b = balls[i];
+                    force += b.sizeSquared / (-2 * cx * b.posX - 2 * cy * b.posY + (b.posX * b.posX + b.posY * b.posY) + cm);
                 }
                 force *= this.sign;
             }
-            this.grid[id].force = force;
+            this.gridForce[id] = force;
             return force;
         }
 
-        marchingSquares(next: [number, number, number | false], ctx: CanvasRenderingContext2D): [number, number, number | false] | false {
-            const x = next[0];
-            const y = next[1];
-            const pdir = next[2];
-            const id = x + y * (this.sx + 2);
+        marchingSquares(nx: number, ny: number, pdir: number, ctx: CanvasRenderingContext2D): number {
+            // Returns encoded next: nx | (ny << 10) | (dir << 20), or -1 for stop
+            const id = nx + ny * this.gridStride;
 
-            if (this.grid[id].computed === this.iter) {
-                return false;
+            if (this.gridComputed[id] === this.iter) {
+                return -1;
             }
 
             let dir: number;
             let mscase = 0;
+            const stride = this.gridStride;
 
             for (let i = 0; i < 4; i++) {
-                const idn = (x + this.ix[i + 12]) + (y + this.ix[i + 16]) * (this.sx + 2);
-                let force = this.grid[idn].force;
+                const idn = (nx + this.ix[i + 12]) + (ny + this.ix[i + 16]) * stride;
+                let force = this.gridForce[idn];
                 if ((force > 0 && this.sign < 0) || (force < 0 && this.sign > 0) || !force) {
                     force = this.computeForce(
-                        x + this.ix[i + 12],
-                        y + this.ix[i + 16],
+                        nx + this.ix[i + 12],
+                        ny + this.ix[i + 16],
                         idn
                     );
                 }
-                if (Math.abs(force) > 1) mscase += Math.pow(2, i);
+                if (Math.abs(force) > 1) mscase += (1 << i);
             }
 
             if (mscase === 15) {
-                return [x, y - 1, false];
-            } else {
-                if (mscase === 5) dir = (pdir === 2) ? 3 : 1;
-                else if (mscase === 10) dir = (pdir === 3) ? 0 : 2;
-                else {
-                    dir = this.mscases[mscase];
-                    this.grid[id].computed = this.iter;
-                }
-
-                const ix = this.step / (
-                    Math.abs(Math.abs(this.grid[(x + this.plx[4 * dir + 2]) + (y + this.ply[4 * dir + 2]) * (this.sx + 2)].force) - 1) /
-                    Math.abs(Math.abs(this.grid[(x + this.plx[4 * dir + 3]) + (y + this.ply[4 * dir + 3]) * (this.sx + 2)].force) - 1) + 1
-                );
-
-                ctx.lineTo(
-                    this.grid[(x + this.plx[4 * dir]) + (y + this.ply[4 * dir]) * (this.sx + 2)].x + this.ix[dir] * ix,
-                    this.grid[(x + this.plx[4 * dir + 1]) + (y + this.ply[4 * dir + 1]) * (this.sx + 2)].y + this.ix[dir + 4] * ix
-                );
-                this.paint = true;
-
-                return [
-                    x + this.ix[dir + 4],
-                    y + this.ix[dir + 8],
-                    dir
-                ];
+                // Encode: nx, ny-1, dir=0 (unused, pdir=false equivalent)
+                return nx | ((ny - 1) << 10) | (0 << 20) | (1 << 30); // flag bit 30 = "no dir"
             }
+
+            if (mscase === 5) dir = (pdir === 2) ? 3 : 1;
+            else if (mscase === 10) dir = (pdir === 3) ? 0 : 2;
+            else {
+                dir = this.mscases[mscase];
+                this.gridComputed[id] = this.iter;
+            }
+
+            const d4 = dir << 2; // dir * 4
+            const refId1 = (nx + this.plx[d4 + 2]) + (ny + this.ply[d4 + 2]) * stride;
+            const refId2 = (nx + this.plx[d4 + 3]) + (ny + this.ply[d4 + 3]) * stride;
+            const interpX = this.step / (
+                Math.abs(Math.abs(this.gridForce[refId1]) - 1) /
+                Math.abs(Math.abs(this.gridForce[refId2]) - 1) + 1
+            );
+
+            const baseId1 = (nx + this.plx[d4]) + (ny + this.ply[d4]) * stride;
+            const baseId2 = (nx + this.plx[d4 + 1]) + (ny + this.ply[d4 + 1]) * stride;
+            ctx.lineTo(
+                this.gridX[baseId1] + this.ix[dir] * interpX,
+                this.gridY[baseId2] + this.ix[dir + 4] * interpX
+            );
+            this.paint = true;
+
+            return (nx + this.ix[dir + 4]) | ((ny + this.ix[dir + 8]) << 10) | (dir << 20);
         }
 
-        renderMetaballs(ctx: CanvasRenderingContext2D): void {
-            let i = 0;
-            let ball: Ball;
-            while ((ball = this.balls[i++])) ball.move();
+        renderMetaballs(ctx: CanvasRenderingContext2D, animated: boolean): void {
+            const balls = this.balls;
+            const len = balls.length;
+
+            if (animated) {
+                for (let i = 0; i < len; i++) balls[i].move();
+            }
 
             this.iter++;
             this.sign = -this.sign;
@@ -241,18 +254,27 @@ const {
             ctx.fillStyle = this.metaFill;
             ctx.beginPath();
 
-            i = 0;
-            while ((ball = this.balls[i++])) {
-                const next: [number, number, number | false] = [
-                    Math.round(ball.pos.x / this.step),
-                    Math.round(ball.pos.y / this.step),
-                    false
-                ];
+            for (let i = 0; i < len; i++) {
+                const ball = balls[i];
+                let cx = Math.round(ball.posX / this.step);
+                let cy = Math.round(ball.posY / this.step);
+                let cdir = -1; // -1 represents "false"/no direction
+                let hasResult = true;
 
-                let current: [number, number, number | false] | false = next;
                 do {
-                    current = this.marchingSquares(current, ctx);
-                } while (current);
+                    const result = this.marchingSquares(cx, cy, cdir, ctx);
+                    if (result === -1) {
+                        hasResult = false;
+                    } else {
+                        cx = result & 0x3FF;
+                        cy = (result >> 10) & 0x3FF;
+                        if (result & (1 << 30)) {
+                            cdir = -1; // "no dir" flag
+                        } else {
+                            cdir = (result >> 20) & 0x3FF;
+                        }
+                    }
+                } while (hasResult);
 
                 if (this.paint) {
                     ctx.fill();
@@ -265,11 +287,9 @@ const {
     }
 
     function resolveColor(value: string): string {
-        // If it's already a raw CSS color (hex, rgb, etc.), use as-is
         if (value.startsWith('#') || value.startsWith('rgb') || value.startsWith('hsl')) {
             return value;
         }
-        // Otherwise treat it as a Tailwind theme color name and read the CSS variable
         const cssVar = `--color-${value}`;
         const resolved = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
         return resolved || value;
@@ -284,43 +304,93 @@ const {
 
         const color = resolveColor(container.dataset.color || '#6b0f54');
         const numBalls = parseInt(container.dataset.numBalls || '6', 10);
-        const ballSize = parseFloat(container.dataset.ballSize || '1');
+        const ballSizeProp = parseFloat(container.dataset.ballSize || '1');
+        const animated = container.dataset.animated !== 'false';
+        const overflowProp = container.dataset.overflow ? parseInt(container.dataset.overflow, 10) : null;
+        const responsive = container.dataset.responsive === 'true';
 
         let lava: LavaLamp | null = null;
-        let animationId: number;
+        let animationId = 0;
+        let isVisible = true;
 
         function resize(): void {
             const visibleWidth = container.offsetWidth;
             const visibleHeight = container.offsetHeight;
-            // Calculate the max possible ball size to determine overflow
-            const wh = Math.min(visibleWidth, visibleHeight);
-            const maxBallSize = ((wh / 15) + 1.5 * (wh / 15)) * ballSize;
-            const overflow = Math.ceil(maxBallSize * 5);
+            const overflow = overflowProp ?? 200;
             const width = visibleWidth + overflow * 2;
             const height = visibleHeight + overflow * 2;
             canvas.width = width;
             canvas.height = height;
             canvas.style.left = `-${overflow}px`;
             canvas.style.top = `-${overflow}px`;
-            // Scale down number of balls for narrow viewports to avoid overcrowding
-            const effectiveNumBalls = Math.max(2, Math.round(numBalls * Math.min(1, visibleWidth / 500)));
-            lava = new LavaLamp(width, height, effectiveNumBalls, color, ballSize, ctx!, visibleWidth, visibleHeight);
+
+            let effectiveNumBalls = numBalls;
+            let effectiveBallSize = ballSizeProp;
+
+            if (responsive) {
+                // Adjust number of balls based on width
+                // Base width of 1200px as reference for full amount
+                const widthFactor = visibleWidth / 1200;
+                
+                // More aggressive scaling for small screens
+                // We'll use a power function to reduce ball count faster as width decreases
+                // widthFactor is between 0 and 1 for widths < 1200px
+                // widthFactor^1.5 will give a smaller number of balls for width < 1200px
+                effectiveNumBalls = Math.max(2, Math.round(numBalls * Math.pow(widthFactor, 1.2)));
+                
+                // Adjust ball size for smaller screens
+                // On mobile (visibleWidth < 640), we should probably REDUCE size instead of increasing it
+                // Since the user says they are too big.
+                if (visibleWidth < 640) {
+                    effectiveBallSize = ballSizeProp * 0.7; // Reduce size on mobile
+                } else if (visibleWidth < 1024) {
+                    effectiveBallSize = ballSizeProp * 0.9; // Slight reduction for tablets
+                } else if (visibleWidth > 1500) {
+                    effectiveBallSize = ballSizeProp * 0.8;
+                }
+            } else {
+                // Legacy responsive logic if not explicitly set to responsive mode? 
+                // Line 316 had: Math.max(2, Math.round(numBalls * Math.min(1, visibleWidth / 500)))
+                // I will keep a simplified version of it to avoid breaking changes if 'responsive' is false but it was already partially responsive
+                effectiveNumBalls = Math.max(2, Math.round(numBalls * Math.min(1, visibleWidth / 600)));
+            }
+            
+            lava = new LavaLamp(width, height, effectiveNumBalls, color, effectiveBallSize, ctx!);
         }
 
         function run(): void {
             if (!lava || !ctx) return;
-            animationId = requestAnimationFrame(run);
+            if (animated && isVisible) {
+                animationId = requestAnimationFrame(run);
+            }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            lava.renderMetaballs(ctx);
+            lava.renderMetaballs(ctx, animated);
         }
+
+        // Pause animation when off-screen
+        const observer = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+                isVisible = entry.isIntersecting;
+                if (isVisible && animated) {
+                    cancelAnimationFrame(animationId);
+                    animationId = requestAnimationFrame(run);
+                }
+            }
+        }, { threshold: 0 });
+        observer.observe(container);
 
         resize();
         run();
 
+        // Debounced resize handler
+        let resizeTimer: ReturnType<typeof setTimeout>;
         window.addEventListener('resize', () => {
             cancelAnimationFrame(animationId);
-            resize();
-            run();
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                resize();
+                run();
+            }, 150);
         });
     }
 

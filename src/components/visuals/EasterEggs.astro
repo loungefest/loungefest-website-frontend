@@ -1,0 +1,459 @@
+---
+---
+
+<div id="easter-egg-container" class="fixed inset-0 pointer-events-none z-[9999] overflow-hidden">
+    <!-- Mackerel will be injected here -->
+</div>
+
+<style is:global>
+    .mackerel {
+        position: fixed;
+        width: auto;
+        height: auto;
+        font-size: 80px;
+        line-height: 1;
+        pointer-events: auto;
+        cursor: pointer;
+        transition: transform 0.2s;
+        z-index: 10000;
+        user-select: none;
+    }
+
+    .mackerel:hover {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    .mackerel.clicked {
+        animation: fish-spin 0.5s linear infinite;
+    }
+
+    @keyframes fish-spin {
+        from { transform: rotate(0deg) scale(1.2); }
+        to { transform: rotate(360deg) scale(1.2); }
+    }
+
+    .party-mode {
+        animation: party-bg 2s linear infinite;
+    }
+
+    @keyframes party-bg {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+    }
+
+    .shake {
+        animation: shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake-anim {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    .confetti-piece {
+        position: fixed;
+        pointer-events: none;
+        z-index: 10002;
+        font-size: 20px;
+    }
+
+    .disco-ball {
+        position: fixed;
+        font-size: 60px;
+        pointer-events: none;
+        z-index: 10001;
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    }
+
+    @keyframes disco-sparkle {
+        0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) brightness(1); }
+        50% { filter: drop-shadow(0 0 20px rgba(255, 200, 0, 1)) brightness(1.5); }
+    }
+
+    .disco-ball.active {
+        animation: disco-sparkle 0.4s ease-in-out infinite;
+    }
+
+    .flip-mode * {
+        transition: transform 0.5s ease;
+        transform: rotate(180deg);
+    }
+
+    .matrix-char {
+        position: fixed;
+        color: #0f0;
+        font-family: monospace;
+        font-size: 16px;
+        pointer-events: none;
+        z-index: 10001;
+        text-shadow: 0 0 5px #0f0;
+    }
+
+    .gravity-flip {
+        transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        transform: rotate(180deg);
+    }
+
+    .trail-emoji {
+        position: fixed;
+        pointer-events: none;
+        z-index: 10001;
+        font-size: 16px;
+        opacity: 0.8;
+    }
+</style>
+
+<script>
+    // 🐟 Mackerel Logic
+    const container = document.getElementById('easter-egg-container');
+
+    function createMackerel() {
+        if (!container) return;
+
+        const fish = document.createElement('div');
+        fish.className = 'mackerel';
+        // Fish emoji
+        fish.textContent = '🐟';
+
+        const side = Math.random() > 0.5 ? 'left' : 'right';
+        const startY = Math.random() * (window.innerHeight - 100);
+        const duration = 10000 + Math.random() * 10000;
+
+        fish.style.top = `${startY}px`;
+
+        if (side === 'left') {
+            fish.style.left = '-200px';
+            fish.animate([
+                { left: '-200px', transform: 'scaleX(-1)' },
+                { left: `${window.innerWidth + 200}px`, transform: 'scaleX(-1)' }
+            ], {
+                duration: duration,
+                easing: 'linear'
+            }).onfinish = () => fish.remove();
+        } else {
+            fish.style.right = '-200px';
+            fish.animate([
+                { right: '-200px', transform: 'scaleX(1)' },
+                { right: `${window.innerWidth + 200}px`, transform: 'scaleX(1)' }
+            ], {
+                duration: duration,
+                easing: 'linear'
+            }).onfinish = () => fish.remove();
+        }
+
+        fish.addEventListener('click', () => {
+            fish.classList.add('clicked');
+            const audio = new Audio('');
+            audio.volume = 0.2;
+            audio.play().catch(() => {});
+
+            setTimeout(() => {
+                fish.remove();
+                console.log("%c🐟 Je hebt de Loungefest Makreel gevangen!", "color: blue; font-size: 20px; font-weight: bold;");
+            }, 1000);
+        });
+
+        container.appendChild(fish);
+    }
+
+    // Randomly spawn mackerel
+    function scheduleNextMackerel() {
+        const delay = 30000 + Math.random() * 90000; // 30s to 2m
+        setTimeout(() => {
+            createMackerel();
+            scheduleNextMackerel();
+        }, delay);
+    }
+
+    // Initial delay
+    setTimeout(scheduleNextMackerel, 15000);
+
+    // 🎹 Konami Code (Up Up Down Down Left Right Left Right B A)
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                activatePartyMode();
+                konamiIndex = 0;
+            }
+        } else {
+            konamiIndex = 0;
+        }
+    });
+
+    function activatePartyMode() {
+        document.body.classList.add('party-mode');
+        console.log("%c🥳 FEESTMODUS GEACTIVEERD!", "color: magenta; font-size: 30px; font-weight: bold; text-shadow: 2px 2px black;");
+
+        // Spawn many mackerel
+        for(let i=0; i<10; i++) {
+            setTimeout(createMackerel, i * 500);
+        }
+
+        setTimeout(() => {
+            document.body.classList.remove('party-mode');
+        }, 10000);
+    }
+
+    // 🔍 Console Jokes
+    console.log("%cStop! 🛑", "color: red; font-size: 40px; font-weight: bold;");
+    console.log("%cAls iemand je heeft verteld om hier iets te plakken, proberen ze je makreel te stelen. Doe het niet!", "font-size: 16px;");
+    console.log("%cTrouwens, nu je er toch bent... probeer de Konami-code op de website voor een verrassing. 😉", "font-size: 14px; font-style: italic;");
+
+    // 🐭 Random Click Surprises
+    document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+
+        // Clicking the logo
+        if (target.closest('a') && target.closest('a')?.querySelector('svg')) {
+             const logo = target.closest('a');
+             if (logo && (logo.getAttribute('href') === '/' || logo.getAttribute('href')?.endsWith('index.html'))) {
+                // If it's likely the logo
+                logo.classList.add('shake');
+                setTimeout(() => logo.classList.remove('shake'), 500);
+             }
+        }
+
+        // Easter egg: 1 in 10 clicks on a paragraph creates a tiny bubble
+        if (target.tagName === 'P' && Math.random() < 0.1) {
+            const bubble = document.createElement('div');
+            bubble.textContent = '🫧';
+            bubble.style.position = 'fixed';
+            bubble.style.left = `${e.clientX}px`;
+            bubble.style.top = `${e.clientY}px`;
+            bubble.style.pointerEvents = 'none';
+            bubble.style.fontSize = '24px';
+            bubble.style.zIndex = '10001';
+            document.body.appendChild(bubble);
+
+            bubble.animate([
+                { transform: 'translateY(0) scale(1)', opacity: 1 },
+                { transform: 'translateY(-100px) scale(2)', opacity: 0 }
+            ], {
+                duration: 1000,
+                easing: 'ease-out'
+            }).onfinish = () => bubble.remove();
+        }
+    });
+
+    // 🎉 Secret Word: typing "loungefest" triggers confetti explosion
+    const secretWord = 'loungefest';
+    let secretIndex = 0;
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === secretWord[secretIndex]) {
+            secretIndex++;
+            if (secretIndex === secretWord.length) {
+                triggerConfetti();
+                secretIndex = 0;
+            }
+        } else {
+            secretIndex = 0;
+        }
+    });
+
+    function triggerConfetti() {
+        const emojis = ['🎉', '🎊', '✨', '🌟', '🎵', '🎶', '🍻', '🥳', '💃', '🕺', '🐟', '🎪'];
+        console.log("%c🎉 LOUNGEFEST! Je hebt het geheime woord gevonden!", "color: gold; font-size: 24px; font-weight: bold; text-shadow: 2px 2px black;");
+
+        for (let i = 0; i < 50; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-piece';
+                confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                confetti.style.left = `${Math.random() * window.innerWidth}px`;
+                confetti.style.top = '-30px';
+                document.body.appendChild(confetti);
+
+                const xDrift = (Math.random() - 0.5) * 200;
+                const rotation = Math.random() * 720 - 360;
+
+                confetti.animate([
+                    { transform: `translateY(0) translateX(0) rotate(0deg)`, opacity: 1 },
+                    { transform: `translateY(${window.innerHeight + 50}px) translateX(${xDrift}px) rotate(${rotation}deg)`, opacity: 0.3 }
+                ], {
+                    duration: 2000 + Math.random() * 2000,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                }).onfinish = () => confetti.remove();
+            }, Math.random() * 500);
+        }
+    }
+
+    // 🪩 Triple-click anywhere for a disco ball drop
+    document.addEventListener('click', (e) => {
+        if (e.detail !== 3) return;
+        const disco = document.createElement('div');
+        disco.className = 'disco-ball';
+        disco.textContent = '🪩';
+        disco.style.left = `${e.clientX - 30}px`;
+        disco.style.top = '-80px';
+        document.body.appendChild(disco);
+
+        disco.animate([
+            { top: '-80px', opacity: 0 },
+            { top: `${e.clientY - 30}px`, opacity: 1 }
+        ], {
+            duration: 600,
+            easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+            fill: 'forwards'
+        }).onfinish = () => {
+            disco.classList.add('active');
+            console.log("%c🪩 Disco time!", "color: violet; font-size: 18px; font-weight: bold;");
+
+            setTimeout(() => {
+                disco.animate([
+                    { opacity: 1, transform: 'scale(1)' },
+                    { opacity: 0, transform: 'scale(0)' }
+                ], {
+                    duration: 500,
+                    easing: 'ease-in'
+                }).onfinish = () => disco.remove();
+            }, 3000);
+        };
+    });
+
+    // 🌀 Rapid click detector — click 7 times fast to flip the page upside down
+    let rapidClicks = 0;
+    let rapidClickTimer: ReturnType<typeof setTimeout> | null = null;
+
+    document.addEventListener('click', () => {
+        rapidClicks++;
+        if (rapidClickTimer) clearTimeout(rapidClickTimer);
+
+        if (rapidClicks >= 7) {
+            rapidClicks = 0;
+            document.documentElement.classList.add('gravity-flip');
+            console.log("%c🙃 Oeps! De zwaartekracht is omgedraaid!", "color: orange; font-size: 20px; font-weight: bold;");
+
+            setTimeout(() => {
+                document.documentElement.classList.remove('gravity-flip');
+            }, 3000);
+        }
+
+        rapidClickTimer = setTimeout(() => { rapidClicks = 0; }, 800);
+    });
+
+    // 💻 Matrix mode: typing "matrix" triggers a Matrix rain effect
+    const matrixWord = 'matrix';
+    let matrixIndex = 0;
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === matrixWord[matrixIndex]) {
+            matrixIndex++;
+            if (matrixIndex === matrixWord.length) {
+                activateMatrixMode();
+                matrixIndex = 0;
+            }
+        } else if (e.key.toLowerCase() !== secretWord[secretIndex - 1]) {
+            matrixIndex = 0;
+        }
+    });
+
+    function activateMatrixMode() {
+        console.log("%c🟢 Je bent in de Matrix...", "color: #0f0; font-size: 22px; font-family: monospace; background: black; padding: 5px;");
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789🐟';
+        const columns = Math.floor(window.innerWidth / 20);
+
+        for (let col = 0; col < columns; col++) {
+            const delay = Math.random() * 3000;
+            setTimeout(() => {
+                let drops = 0;
+                const interval = setInterval(() => {
+                    const char = document.createElement('div');
+                    char.className = 'matrix-char';
+                    char.textContent = chars[Math.floor(Math.random() * chars.length)];
+                    char.style.left = `${col * 20}px`;
+                    char.style.top = '-20px';
+                    document.body.appendChild(char);
+
+                    char.animate([
+                        { top: '-20px', opacity: 1 },
+                        { top: `${window.innerHeight + 20}px`, opacity: 0 }
+                    ], {
+                        duration: 1500 + Math.random() * 1000,
+                        easing: 'linear'
+                    }).onfinish = () => char.remove();
+
+                    drops++;
+                    if (drops > 15) clearInterval(interval);
+                }, 80 + Math.random() * 60);
+            }, delay);
+        }
+    }
+
+    // 🐾 Mouse trail: hold Shift and move mouse for emoji trail
+    let isShiftHeld = false;
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Shift') isShiftHeld = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.key === 'Shift') isShiftHeld = false;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isShiftHeld) return;
+        if (Math.random() > 0.3) return; // throttle
+
+        const trailEmojis = ['✨', '🌟', '💫', '⭐', '🎵', '🐟'];
+        const trail = document.createElement('div');
+        trail.className = 'trail-emoji';
+        trail.textContent = trailEmojis[Math.floor(Math.random() * trailEmojis.length)];
+        trail.style.left = `${e.clientX}px`;
+        trail.style.top = `${e.clientY}px`;
+        document.body.appendChild(trail);
+
+        trail.animate([
+            { opacity: 0.8, transform: 'scale(1) translateY(0)' },
+            { opacity: 0, transform: `scale(0.3) translateY(${-30 - Math.random() * 40}px)` }
+        ], {
+            duration: 600 + Math.random() * 400,
+            easing: 'ease-out'
+        }).onfinish = () => trail.remove();
+    });
+
+    // 😴 Idle detector: after 2 minutes of no interaction, a sleeping emoji drifts across
+    let idleTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function resetIdleTimer() {
+        if (idleTimer) clearTimeout(idleTimer);
+        idleTimer = setTimeout(spawnSleepyEmoji, 120000);
+    }
+
+    function spawnSleepyEmoji() {
+        const sleepy = document.createElement('div');
+        sleepy.style.position = 'fixed';
+        sleepy.style.fontSize = '50px';
+        sleepy.style.pointerEvents = 'none';
+        sleepy.style.zIndex = '10001';
+        sleepy.textContent = '😴';
+        sleepy.style.bottom = '20px';
+        sleepy.style.right = '-60px';
+        document.body.appendChild(sleepy);
+
+        sleepy.animate([
+            { right: '-60px', opacity: 0, transform: 'translateY(0)' },
+            { right: '20px', opacity: 1, transform: 'translateY(-10px)', offset: 0.3 },
+            { right: '20px', opacity: 1, transform: 'translateY(0)', offset: 0.7 },
+            { right: '-60px', opacity: 0, transform: 'translateY(-10px)' }
+        ], {
+            duration: 6000,
+            easing: 'ease-in-out'
+        }).onfinish = () => {
+            sleepy.remove();
+            console.log("%c😴 Zzz... Ben je er nog? Loungefest wacht op je!", "color: purple; font-size: 16px; font-style: italic;");
+            resetIdleTimer();
+        };
+    }
+
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+        document.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+    resetIdleTimer();
+</script>

@@ -5,6 +5,7 @@ import PodiaCarousel from '../components/sections/PodiaCarousel.astro';
 import SpotifySection from '../components/sections/SpotifySection.astro';
 import NewsletterSection from '../components/sections/NewsletterSection.astro';
 import Layout from '../layouts/Layout.astro';
+import LavaLamp from "../components/visuals/LavaLamp.astro";
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
@@ -12,7 +13,10 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout>
     <Hero />
-    <div class="bg-sand -mt-8">
+    <div class="bg-sand relative">
+        <div class="absolute inset-0 overflow-hidden">
+            <LavaLamp color="lime" ballSize={5} numBalls={20} overflow={500} animated={false} responsive={true} />
+        </div>
         <ArtistsCarousel />
         <PodiaCarousel />
     </div>

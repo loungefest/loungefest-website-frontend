@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
+import TicketsCTA from '../../components/sections/TicketsCTA.astro';
 import { artists } from '../../data/artists';
 import { Image } from 'astro:assets';
 import heroImage from '../../assets/images/lf-hero.jpg';
@@ -53,6 +54,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
             </div>
         </div>
     </section>
+    <TicketsCTA variant="lime" />
 </Layout>
 
 <script>
