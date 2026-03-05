@@ -18,11 +18,11 @@ const {
 } = Astro.props;
 ---
 
-<div class="lavalamp-container" 
-    data-color={color} 
-    data-num-balls={numBalls} 
-    data-ball-size={ballSize} 
-    data-animated={animated.toString()} 
+<div class="lavalamp-container"
+    data-color={color}
+    data-num-balls={numBalls}
+    data-ball-size={ballSize}
+    data-animated={animated.toString()}
     data-overflow={overflow !== undefined ? overflow.toString() : undefined}
     data-responsive={responsive.toString()}
 >
@@ -327,34 +327,21 @@ const {
             let effectiveNumBalls = numBalls;
             let effectiveBallSize = ballSizeProp;
 
-            if (responsive) {
-                // Adjust number of balls based on width
-                // Base width of 1200px as reference for full amount
-                const widthFactor = visibleWidth / 1200;
-                
-                // More aggressive scaling for small screens
-                // We'll use a power function to reduce ball count faster as width decreases
-                // widthFactor is between 0 and 1 for widths < 1200px
-                // widthFactor^1.5 will give a smaller number of balls for width < 1200px
-                effectiveNumBalls = Math.max(2, Math.round(numBalls * Math.pow(widthFactor, 1.2)));
-                
-                // Adjust ball size for smaller screens
-                // On mobile (visibleWidth < 640), we should probably REDUCE size instead of increasing it
-                // Since the user says they are too big.
-                if (visibleWidth < 640) {
-                    effectiveBallSize = ballSizeProp * 0.7; // Reduce size on mobile
-                } else if (visibleWidth < 1024) {
-                    effectiveBallSize = ballSizeProp * 0.9; // Slight reduction for tablets
-                } else if (visibleWidth > 1500) {
-                    effectiveBallSize = ballSizeProp * 0.8;
-                }
-            } else {
-                // Legacy responsive logic if not explicitly set to responsive mode? 
-                // Line 316 had: Math.max(2, Math.round(numBalls * Math.min(1, visibleWidth / 500)))
-                // I will keep a simplified version of it to avoid breaking changes if 'responsive' is false but it was already partially responsive
-                effectiveNumBalls = Math.max(2, Math.round(numBalls * Math.min(1, visibleWidth / 600)));
-            }
-            
+            // Adjust number of balls based on available area (width × height)
+            // Base dimensions of 1200×800 as reference for full amount
+            const widthFactor = visibleWidth / 1200;
+            const heightFactor = visibleHeight / 800;
+
+            // Use the geometric mean of both factors so that a narrow-but-tall
+            // container and a wide-but-short container are treated equally.
+            const areaFactor = Math.sqrt(widthFactor * heightFactor);
+
+            effectiveNumBalls = Math.max(2, Math.round(numBalls * areaFactor));
+
+            // Also scale ball size down slightly for smaller areas
+            // to prevent balls from dominating the available space
+            effectiveBallSize = ballSizeProp * Math.max(0.5, Math.min(1, areaFactor));
+
             lava = new LavaLamp(width, height, effectiveNumBalls, color, effectiveBallSize, ctx!);
         }
 
