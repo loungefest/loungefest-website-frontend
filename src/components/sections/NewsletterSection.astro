@@ -1,11 +1,26 @@
 ---
 import Button from '../ui/Button.astro';
 import LoungefestIcon from '../logo/LoungefestIcon.astro';
+
+// Randomize icon position, size, and rotation
+const randomTop = Math.floor(Math.random() * 80) - 10; // Range: -10% to 70%
+const randomLeft = Math.floor(Math.random() * 80) - 10; // Range: -10% to 70%
+const randomSize = Math.floor(Math.random() * 20) + 15; // Range: 15rem to 35rem
+const randomRotation = Math.floor(Math.random() * 91) - 45; // Range: -45 to 45 degrees
 ---
 
 <section class="relative bg-lime py-24 overflow-hidden">
     <!-- Decorative Icon Background -->
-    <div class="absolute -left-20 -bottom-20 h-64 w-64 opacity-20 rotate-12 pointer-events-none select-none">
+    <div 
+        class="absolute opacity-20 pointer-events-none select-none"
+        style={{
+            top: `${randomTop}%`,
+            left: `${randomLeft}%`,
+            width: `${randomSize}rem`,
+            height: `${randomSize}rem`,
+            transform: `rotate(${randomRotation}deg)`
+        }}
+    >
         <LoungefestIcon color="plum" class="h-full w-full" />
     </div>
 

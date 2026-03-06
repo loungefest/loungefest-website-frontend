@@ -3,40 +3,41 @@ import Layout from '../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 import TicketsCTA from '../components/sections/TicketsCTA.astro';
 import heroImage from '../assets/images/lf-hero.jpg';
+import LavaLamp from "../components/visuals/LavaLamp.astro";
 
 const ploegen = [
-    { 
-        name: 'Artiesten begeleiding', 
+    {
+        name: 'Artiesten begeleiding',
         image: 'https://placehold.co/600x600?text=Artiesten+begeleiding',
         names: ['Maartje', 'Lise', 'Nathalie', 'Nina', 'Roel', 'Roos', 'Michelle', 'Fleur B', 'Guusje', 'Stijn', 'Iris', 'Fleur K', 'Esmee', 'Marjolein'],
         email: 'hospitality@loungefest.nl'
     },
-    { 
-        name: "Bavo's", 
+    {
+        name: "Bavo's",
         image: 'https://placehold.co/600x600?text=Bavo%27s',
         names: ['Sjoerd', 'Twan', 'Luuk', 'Stan', 'Mick', 'Wessel', 'Bas', 'Lars', 'Niels', 'Joris'],
         email: 'bavos@loungefest.nl'
     },
-    { 
-        name: 'Bouwcrew', 
+    {
+        name: 'Bouwcrew',
         image: 'https://placehold.co/600x600?text=Bouwcrew',
         names: ['Gijs', 'Wouter', 'Kevin', 'Sven', 'Thijs', 'Tim', 'Niek', 'Bart', 'Daan', 'Hugo'],
         email: 'bouwcrew@loungefest.nl'
     },
-    { 
-        name: 'Clawbangers', 
+    {
+        name: 'Clawbangers',
         image: 'https://placehold.co/600x600?text=Clawbangers',
         names: ['Amber', 'Eva', 'Lisa', 'Britt', 'Isa', 'Maud', 'Julia', 'Floor', 'Tess', 'Iris'],
         email: 'clawbangers@loungefest.nl'
     },
-    { 
-        name: 'Finance', 
+    {
+        name: 'Finance',
         image: 'https://placehold.co/600x600?text=Finance',
         names: ['Mark', 'Sander', 'Tom', 'Jeroen', 'Bas'],
         email: 'finance@loungefest.nl'
     },
-    { 
-        name: 'Infra', 
+    {
+        name: 'Infra',
         image: 'https://placehold.co/600x600?text=Infra',
         names: ['Rick', 'Stefan', 'Kevin', 'Dennis', 'Nick'],
         email: 'infra@loungefest.nl'
@@ -55,9 +56,12 @@ const ploegen = [
         <div class="absolute inset-0 bg-black/30"></div>
     </section>
 
-    <section class="bg-plum py-24 text-white min-h-screen">
-        <div class="container mx-auto px-4 max-w-6xl">
-            <h1 class="text-center font-display text-5xl sm:text-7xl md:text-8xl font-bold mb-20 tracking-tight text-magenta">
+    <section class="bg-plum py-24 text-white min-h-screen relative">
+        <div class="absolute inset-0 overflow-hidden">
+            <LavaLamp color="magenta" ballSize={4} numBalls={15} overflow={500} animated={false} responsive={true} />
+        </div>
+        <div class="container mx-auto px-4 max-w-6xl relative z-10">
+            <h1 class="text-center font-display text-5xl sm:text-7xl md:text-8xl font-bold mb-20 tracking-tight text-white">
                 Onze ploegen
             </h1>
 
