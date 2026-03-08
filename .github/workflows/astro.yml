@@ -76,7 +76,7 @@ jobs:
             --site "${{ steps.pages.outputs.origin }}" \
             --base "$BASE_PATH"
         env:
-          STRAPI_URL: ${{ secrets.STRAPI_URL }}
+          STRAPI_URL: ${{ vars.STRAPI_URL }}
           STRAPI_API_TOKEN: ${{ secrets.STRAPI_API_TOKEN }}
         working-directory: ${{ env.BUILD_PATH }}
       - name: Upload artifact
