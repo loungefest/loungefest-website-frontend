@@ -1,0 +1,34 @@
+---
+import fetchApi from '../lib/strapi';
+
+let artists = [];
+let error = null;
+
+try {
+  artists = await fetchApi({
+    endpoint: 'artists',
+    wrappedByKey: 'data',
+  });
+} catch (e) {
+  error = e.message;
+}
+---
+
+<html>
+  <body>
+    <h1>Strapi Connection Test</h1>
+    {error ? (
+      <p style="color: red;">Error: {error}</p>
+    ) : (
+      <ul>
+        {artists && artists.length > 0 ? (
+          artists.map((artist) => (
+            <li>{artist.attributes?.name || artist.name}</li>
+          ))
+        ) : (
+          <li>No artists found. Make sure the Strapi API is running and has data.</li>
+        )}
+      </ul>
+    )}
+  </body>
+</html>

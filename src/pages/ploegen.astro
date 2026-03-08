@@ -5,44 +5,51 @@ import TicketsCTA from '../components/sections/TicketsCTA.astro';
 import heroImage from '../assets/images/lf-hero.jpg';
 import LavaLamp from "../components/visuals/LavaLamp.astro";
 
-const ploegen = [
-    {
-        name: 'Artiesten begeleiding',
-        image: 'https://placehold.co/600x600?text=Artiesten+begeleiding',
-        names: ['Maartje', 'Lise', 'Nathalie', 'Nina', 'Roel', 'Roos', 'Michelle', 'Fleur B', 'Guusje', 'Stijn', 'Iris', 'Fleur K', 'Esmee', 'Marjolein'],
-        email: 'hospitality@loungefest.nl'
+import fetchApi, { getStrapiMedia } from '../lib/strapi';
+
+type StrapiPloeg = {
+    title: string;
+    description: any;
+    email?: string;
+    image: any;
+    attributes?: any;
+};
+
+const extractText = (blocks: any): string => {
+    if (typeof blocks === 'string') return blocks;
+    if (Array.isArray(blocks)) {
+        return blocks
+            .flatMap((block: any) => (Array.isArray(block?.children)
+                ? block.children.map((child: any) => child?.text)
+                : []))
+            .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+            .join(' ')
+            .trim();
+    }
+    return '';
+};
+
+const rawPloegen = await fetchApi<StrapiPloeg[]>({
+    endpoint: 'ploegen',
+    wrappedByKey: 'data',
+    query: {
+        populate: '*',
     },
-    {
-        name: "Bavo's",
-        image: 'https://placehold.co/600x600?text=Bavo%27s',
-        names: ['Sjoerd', 'Twan', 'Luuk', 'Stan', 'Mick', 'Wessel', 'Bas', 'Lars', 'Niels', 'Joris'],
-        email: 'bavos@loungefest.nl'
-    },
-    {
-        name: 'Bouwcrew',
-        image: 'https://placehold.co/600x600?text=Bouwcrew',
-        names: ['Gijs', 'Wouter', 'Kevin', 'Sven', 'Thijs', 'Tim', 'Niek', 'Bart', 'Daan', 'Hugo'],
-        email: 'bouwcrew@loungefest.nl'
-    },
-    {
-        name: 'Clawbangers',
-        image: 'https://placehold.co/600x600?text=Clawbangers',
-        names: ['Amber', 'Eva', 'Lisa', 'Britt', 'Isa', 'Maud', 'Julia', 'Floor', 'Tess', 'Iris'],
-        email: 'clawbangers@loungefest.nl'
-    },
-    {
-        name: 'Finance',
-        image: 'https://placehold.co/600x600?text=Finance',
-        names: ['Mark', 'Sander', 'Tom', 'Jeroen', 'Bas'],
-        email: 'finance@loungefest.nl'
-    },
-    {
-        name: 'Infra',
-        image: 'https://placehold.co/600x600?text=Infra',
-        names: ['Rick', 'Stefan', 'Kevin', 'Dennis', 'Nick'],
-        email: 'infra@loungefest.nl'
-    },
-];
+});
+
+const ploegen = (rawPloegen ?? [])
+    .map((item) => {
+        const ploeg = item?.attributes ?? item;
+        const imageMedia = ploeg?.image?.data ?? ploeg?.image;
+
+        return {
+            name: ploeg?.title ?? '',
+            image: getStrapiMedia(imageMedia) ?? heroImage.src,
+            description: extractText(ploeg?.description),
+            email: ploeg?.email ?? null,
+        };
+    })
+    .filter((ploeg) => ploeg.name);
 ---
 
 <Layout>
@@ -78,9 +85,9 @@ const ploegen = [
                                 <h3 class="font-display text-3xl font-bold text-plum-900 mb-4 leading-tight">
                                     {ploeg.name}
                                 </h3>
-                                {ploeg.names && (
-                                    <div class="mb-6 text-plum-900 font-bold text-lg leading-relaxed">
-                                        {ploeg.names.join(', ')}
+                                {ploeg.description && (
+                                    <div class="mb-6 text-plum-900 font-bold text-lg leading-relaxed whitespace-pre-line">
+                                        {ploeg.description}
                                     </div>
                                 )}
                                 {ploeg.email && (

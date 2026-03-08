@@ -1,18 +1,139 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { artists } from '../../data/artists';
 import Button from '../../components/ui/Button.astro';
 import TicketsCTA from '../../components/sections/TicketsCTA.astro';
-import { Image } from 'astro:assets';
+import fetchApi, { getStrapiMedia } from '../../lib/strapi';
+import heroImage from '../../assets/images/lf-hero.jpg';
 
-export function getStaticPaths() {
-    return artists.map((artist) => ({
-        params: { slug: artist.slug },
-        props: { artist },
-    }));
+type Performance = { datetime?: string; day?: string; time?: string };
+
+type NormalizedPerformance = {
+    day: string;
+    time: string;
+};
+
+type StrapiArtist = {
+    slug?: string;
+    name?: string;
+    day?: string;
+    time?: string;
+    image?: any;
+    description?: unknown;
+    performances?: Performance[];
+    youtubeLink?: string;
+    spotifyLink?: string;
+    attributes?: any;
+};
+
+type ArtistPageData = {
+    slug: string;
+    name: string;
+    imageUrl: string;
+    description: string;
+    performances: NormalizedPerformance[];
+    youtubeLink?: string;
+    spotifyLink?: string;
+};
+
+export async function getStaticPaths() {
+    const dayFormatter = new Intl.DateTimeFormat('nl-NL', {
+        weekday: 'long',
+        timeZone: 'Europe/Amsterdam',
+    });
+
+    const timeFormatter = new Intl.DateTimeFormat('nl-NL', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Europe/Amsterdam',
+    });
+
+    const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+    const normalizePerformance = (performance: Performance): NormalizedPerformance | null => {
+        if (typeof performance?.datetime === 'string') {
+            const date = new Date(performance.datetime);
+
+            if (!Number.isNaN(date.getTime())) {
+                return {
+                    day: capitalize(dayFormatter.format(date)),
+                    time: timeFormatter.format(date),
+                };
+            }
+        }
+
+        if (performance?.day) {
+            return {
+                day: performance.day,
+                time: performance?.time || 't.b.d.',
+            };
+        }
+
+        return null;
+    };
+
+    const extractDescription = (description: unknown): string => {
+        if (typeof description === 'string') {
+            return description;
+        }
+
+        if (Array.isArray(description)) {
+            const text = description
+                .flatMap((block: any) => (Array.isArray(block?.children)
+                    ? block.children.map((child: any) => child?.text)
+                    : []))
+                .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+                .join(' ')
+                .trim();
+
+            if (text) {
+                return text;
+            }
+        }
+
+        return 'Informatie volgt binnenkort.';
+    };
+
+    const rawArtists = await fetchApi<StrapiArtist[]>({
+        endpoint: 'artists',
+        wrappedByKey: 'data',
+        query: {
+            'sort[0]': 'priority:desc',
+            'sort[1]': 'name:asc',
+            populate: '*',
+        },
+    });
+
+    return (rawArtists ?? [])
+        .map((item) => {
+            const artist = item?.attributes ?? item;
+            const imageMedia = artist?.image?.data ?? artist?.image;
+
+            const performances = Array.isArray(artist?.performances)
+                ? artist.performances
+                    .map((performance: Performance) => normalizePerformance(performance))
+                    .filter((performance): performance is NormalizedPerformance => Boolean(performance))
+                : [];
+
+            const pageArtist: ArtistPageData = {
+                slug: artist?.slug ?? '',
+                name: artist?.name ?? '',
+                imageUrl: getStrapiMedia(imageMedia) ?? heroImage.src,
+                description: extractDescription(artist?.description),
+                performances,
+                youtubeLink: artist?.youtubeLink,
+                spotifyLink: artist?.spotifyLink,
+            };
+
+            return {
+                params: { slug: pageArtist.slug },
+                props: { artist: pageArtist },
+            };
+        })
+        .filter((entry) => entry.params.slug && entry.props.artist.name);
 }
 
-const { artist } = Astro.props;
+const { artist } = Astro.props as { artist: ArtistPageData };
 
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
@@ -20,8 +141,8 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
 <Layout>
     <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
-        <Image
-            src={artist.image}
+        <img
+            src={artist.imageUrl}
             alt={artist.name}
             class="absolute inset-0 h-full w-full object-cover"
             loading="eager"
@@ -42,10 +163,11 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
                 <div class="aspect-square overflow-hidden rounded-[2.5rem] bg-plum-800 shadow-2xl">
-                    <Image
-                        src={artist.image}
+                    <img
+                        src={artist.imageUrl}
                         alt={artist.name}
                         class="h-full w-full object-cover"
+                        loading="lazy"
                     />
                 </div>
 
@@ -55,18 +177,25 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
                     </h1>
 
                     <div class="flex flex-wrap gap-4 mb-10">
-                        <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg>
-                            <span class="font-bold text-xl uppercase tracking-wider">{artist.day}</span>
-                        </div>
-                        <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span class="font-bold text-xl uppercase tracking-wider">{artist.time}</span>
-                        </div>
+                        {artist.performances.length > 0 ? (
+                            artist.performances.map((performance) => (
+                                <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                    </svg>
+                                    <span class="font-bold text-xl uppercase tracking-wider">
+                                        {performance.day} - {performance.time || 't.b.d.'}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span class="font-bold text-xl uppercase tracking-wider">Tijd volgt</span>
+                            </div>
+                        )}
                     </div>
 
                     <div class="prose prose-xl prose-invert max-w-none mb-12 flex-grow">

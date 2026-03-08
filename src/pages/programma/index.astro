@@ -2,9 +2,102 @@
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import TicketsCTA from '../../components/sections/TicketsCTA.astro';
-import { artists } from '../../data/artists';
+import fetchApi, { getStrapiMedia } from '../../lib/strapi';
 import { Image } from 'astro:assets';
 import heroImage from '../../assets/images/lf-hero.jpg';
+
+type Performance = { datetime?: string; day?: string; time?: string };
+
+type NormalizedPerformance = {
+    day: string;
+    time: string;
+};
+
+const dayFormatter = new Intl.DateTimeFormat('nl-NL', {
+    weekday: 'long',
+    timeZone: 'Europe/Amsterdam',
+});
+
+const timeFormatter = new Intl.DateTimeFormat('nl-NL', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Europe/Amsterdam',
+});
+
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+const normalizePerformance = (performance: Performance): NormalizedPerformance | null => {
+    if (typeof performance?.datetime === 'string') {
+        const date = new Date(performance.datetime);
+
+        if (!Number.isNaN(date.getTime())) {
+            return {
+                day: capitalize(dayFormatter.format(date)),
+                time: timeFormatter.format(date),
+            };
+        }
+    }
+
+    if (performance?.day) {
+        return {
+            day: performance.day,
+            time: performance?.time || 't.b.d.',
+        };
+    }
+
+    return null;
+};
+
+type StrapiArtist = {
+    slug?: string;
+    name?: string;
+    priority?: number;
+    image?: any;
+    performances?: Performance[];
+    attributes?: any;
+};
+
+const rawArtists = await fetchApi<StrapiArtist[]>({
+    endpoint: 'artists',
+    wrappedByKey: 'data',
+    query: {
+        'sort[0]': 'priority:desc',
+        'sort[1]': 'name:asc',
+        populate: '*',
+    },
+});
+
+const artists = (rawArtists ?? [])
+    .map((item) => {
+        const artist = item?.attributes ?? item;
+        const imageMedia = artist?.image?.data ?? artist?.image;
+
+        const performances = Array.isArray(artist?.performances)
+            ? artist.performances
+                .map((performance: Performance) => normalizePerformance(performance))
+                .filter((performance): performance is NormalizedPerformance => Boolean(performance))
+            : [];
+
+        const days = performances.length
+            ? [...new Set(performances.map((performance) => performance.day))]
+            : [];
+
+        const scheduleLabel = performances.length
+            ? performances
+                .map((performance) => `${performance.day} - ${performance.time}`)
+                .join(' · ')
+            : 'Tijd volgt';
+
+        return {
+            slug: artist?.slug ?? '',
+            name: artist?.name ?? '',
+            imageUrl: getStrapiMedia(imageMedia) ?? heroImage.src,
+            days,
+            scheduleLabel,
+        };
+    })
+    .filter((artist) => artist.slug && artist.name);
 
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
@@ -35,19 +128,24 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-x-12 md:gap-y-16">
                 {artists.map((artist) => (
-                    <a href={`${base}programma/${artist.slug}`} class="group artist-card block" data-day={artist.day}>
+                    <a
+                        href={`${base}programma/${artist.slug}`}
+                        class="group artist-card block"
+                        data-days={artist.days.join(',')}
+                    >
                         <div class="aspect-square overflow-hidden rounded-[2.5rem] mb-6 bg-plum-800 shadow-xl">
-                            <Image
-                                src={artist.image}
+                            <img
+                                src={artist.imageUrl}
                                 alt={artist.name}
                                 class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                loading="lazy"
                             />
                         </div>
                         <h3 class="font-display text-3xl font-bold text-sky mb-1 leading-tight group-hover:text-magenta transition-colors">
                             {artist.name}
                         </h3>
                         <p class="text-xl font-medium text-white/80">
-                            {artist.day} - {artist.time}
+                            {artist.scheduleLabel}
                         </p>
                     </a>
                 ))}
@@ -83,7 +181,12 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
                 // Filter artists
                 artistCards.forEach(card => {
-                    if (filter === 'all' || card.getAttribute('data-day') === filter) {
+                    const days = (card.getAttribute('data-days') || '')
+                        .split(',')
+                        .map((d) => d.trim())
+                        .filter(Boolean);
+
+                    if (filter === 'all' || days.includes(filter)) {
                         card.classList.remove('hidden');
                     } else {
                         card.classList.add('hidden');

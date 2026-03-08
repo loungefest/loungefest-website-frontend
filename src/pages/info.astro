@@ -4,9 +4,55 @@ import AccordionItem from '../components/ui/AccordionItem.astro';
 import Button from '../components/ui/Button.astro';
 import { Image } from 'astro:assets';
 import heroImage from '../assets/images/lf-hero.jpg';
+import fetchApi from '../lib/strapi';
 
-const rawBase = import.meta.env.BASE_URL;
-const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+type StrapiInfo = {
+    title: string;
+    description: any;
+    priority?: number;
+    attributes?: any;
+};
+
+const extractText = (blocks: any): string => {
+    if (typeof blocks === 'string') return blocks;
+    if (Array.isArray(blocks)) {
+        return blocks
+            .map((block: any) => {
+                if (Array.isArray(block?.children)) {
+                    return block.children
+                        .map((child: any) => child?.text)
+                        .filter((text: unknown): text is string => typeof text === 'string')
+                        .join('');
+                }
+                return '';
+            })
+            .filter((text) => text.length > 0)
+            .join('\n\n')
+            .trim();
+    }
+    return '';
+};
+
+const rawInfos = await fetchApi<StrapiInfo[]>({
+    endpoint: 'infos',
+    wrappedByKey: 'data',
+    query: {
+        'sort[0]': 'priority:asc',
+    },
+});
+
+const infos = (rawInfos ?? [])
+    .map((item) => {
+        const info = item?.attributes ?? item;
+        const docId = item?.documentId ?? item?.id ?? '';
+        return {
+            title: info?.title ?? '',
+            description: extractText(info?.description),
+            id: docId.toString() || (info?.title ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        };
+    })
+    .filter((info) => info.title);
+
 ---
 
 <Layout>
@@ -30,160 +76,13 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
             </h1>
 
             <div class="flex flex-col mb-24">
-                <AccordionItem title="Vacatures" id="vacatures">
-                    <p>Samen feestje bouwen?</p>
-                    <p>Momenteel hebben wij de onderstaande vacatures:</p>
-                    <ol>
-                        <li>Organisatielid Crowd Services</li>
-                        <li>Organisatielid Horeca</li>
-                        <li>Organisatielid Sponsoring</li>
-                    </ol>
-                    <p>Meer informatie; <a href={`${base}vacature`}>https://www.loungefest.nl/vacatures</a></p>
-                </AccordionItem>
-
-                <AccordionItem title="Timetable 2025" id="timetable">
-                    <p><img src={`${base}static/img/timetable_2025.jpg`} alt="timetable 2025" title="timetable_2025" style="cursor: pointer;"></p>
-                </AccordionItem>
-
-                <AccordionItem title="Ticketswap" id="ticketswap">
-                    <p>Helaas is het momenteel niet mogelijk om tickets te verkopen via Ticketswap. We proberen hierover in contact te komen met Ticketswap. Tot die tijd is het wel mogelijk om de tickets te verkopen via Marktplaats of Facebook.</p>
-                </AccordionItem>
-
-                <AccordionItem title="Stichting N.Y.C.E." id="nyce">
-                    <ul>
-                        <li>
-                            <p><strong>Oorsprong</strong><br>Stichting Noordwijkerhout Youth Cultural Events (N.Y.C.E.) is in 2012 opgericht door een vriendengroep met een passie&nbsp;voor gezelligheid.</p>
-                        </li>
-                        <li>
-                            <p><strong>Geen winstoogmerk</strong><br>Geen uitkeringen aan organisatieleden&nbsp;maar 100% besteding aan de doelstelling.</p>
-                        </li>
-                        <li>
-                            <p><strong>Doelstelling</strong><br>Het culturele aanbod in&nbsp;de bollenstreek versterken&nbsp;d.m.v. het evenement Loungefest.</p>
-                        </li>
-                    </ul>
-                </AccordionItem>
-
-                <AccordionItem title="Pendelservice & OV" id="pendelservice">
-                    <h1 id="route-1-busstation-de-brink-noordwijkerhout-loungefest">Route 1: Busstation ‘De Brink’ Noordwijkerhout – Loungefest</h1>
-                    <ul>
-                        <li>Rijdt continu heen en weer.</li>
-                        <li>Vrijdag 17 juli vanaf 18:30 uur</li>
-                        <li>Zaterdag 18 juli vanaf 13:00 uur</li>
-                    </ul>
-                    <p>*Let op: De bus vertrekt vanaf de verhoging tussen Boekhorsterweg en Langevelderweg. Niet vanaf de parkeerplaats bij Como &amp; Co.</p>
-                    <h1 id="route-2-leiden-centraal-station-centrumzijde-zie-foto-onderaan-loungefest">Route 2: Leiden Centraal Station (centrumzijde, zie foto onderaan) – Loungefest</h1>
-                    <ul>
-                        <li>Alleen op zaterdag 18 juli</li>
-                        <li>Eerste vertrek vanaf Leiden: 13:35</li>
-                        <li>Geen tussenstops</li>
-                        <li>Reistijd: ca. 25 minuten</li>
-                    </ul>
-                    <p>Vertrektijden op zaterdag:</p>
-                    <ul>
-                        <li>Vertrek vanaf Leiden Centraal: 13:35 – 14:35 – 15:35 – 16:35</li>
-                        <li>Vertrek vanaf Loungefest: 21:00 – 22:00 – 23:00 – 00:00</li>
-                    </ul>
-                    <p><img src={`${base}static/img/plek-pendelbus.jpg`} alt="centrumzijde Leiden Centraal "></p>
-                </AccordionItem>
-
-                <AccordionItem title="Overnachten" id="overnachten">
-                    <p>Overnachten kan bij één van de naastgelegen locaties, zoals:</p>
-                    <ul>
-                        <li><a href="https://www.stayokay.com/en/hostel/noordwijk?utm_medium=google&amp;utm_source=paid_search&amp;utm_campaign=branded_en&amp;gclid=Cj0KCQjwm6KUBhC3ARIsACIwxBi5ZEV3QgVKw1UGK0BiastZaVtvMKWfOUe_NeTwz4hc7ZyjXhIRWm4aAkgAEALw_wcB">Stayokay</a></li>
-                        <li><a href="https://www.sollasi.nl/camping-sollasi/">Camping Sollasi</a></li>
-                    </ul>
-                    <p><em>Camping life!</em></p>
-                </AccordionItem>
-
-                <AccordionItem title="Openingstijden" id="openingstijden">
-                    <p>Openingstijden Loungefest 2026:</p>
-                    <ul>
-                        <li>Vrijdag 17 juli van 18:00 t/m 00:30</li>
-                        <li>Zaterdag 18 juli van 13:00 t/m 00:30</li>
-                    </ul>
-                </AccordionItem>
-
-                <AccordionItem title="Luister hier" id="luister">
-                    <ol>
-                        <li>Luister naar <a href="https://open.spotify.com/playlist/7dw90IrZQ4QO7LTDWuQgqT?si=8b067abd118140d1">Loungefest 2024 bands</a></li>
-                        <li>Luister naar <a href="https://soundcloud.com/loungefest?utm_source=clipboard&amp;utm_medium=text&amp;utm_campaign=social_sharing">Loungefest 2024 DJs</a></li>
-                        <li>Luister naar <a href="https://www.bollenstreekomroep.nl/nyceradio-archief/">NYCE RADIO!</a><br>Ook iedere vrijdag van 21:00 tot 22:00 op Radio BO (105.3 FM).</li>
-                    </ol>
-                </AccordionItem>
-
-                <AccordionItem title="Kluisjes" id="kluisjes">
-                    <p>Er zijn kluisjes te huur direct naast de ingang!</p>
-                </AccordionItem>
-
-                <AccordionItem title="Huisregels" id="huisregels">
-                    <p><strong>De handige regels:</strong></p>
-                    <ul>
-                        <li>Zonder legitimatie kunnen wij u niet toelaten tot Loungefest.</li>
-                        <li>Wij raden aan om een zwembroek,&nbsp;gehoorbescherming &amp;&nbsp;zonnebrandcrème mee te nemen.</li>
-                        <li>Loungefest is toegankelijk voor alle leeftijden; kinderen jonger dan 12 jaar kunnen onder begeleiding van een volwassene gratis het terrein betreden.</li>
-                        <li>Huisdieren,&nbsp;eigen alcohol, flessen, blikjes, vloeistoffen, etenswaar en glaswerk worden niet toegestaan tot Loungefest.</li>
-                        <li>Bij Loungefest wordt er actief gecontroleerd op alcoholverstrekking aan personen onder 18.</li>
-                        <li>Bij Loungefest&nbsp;wordt er actief gecontroleerd op het bezit van wapens, drugs en andere verboden middelen.</li>
-                        <li>De organisatie van Loungefest&nbsp;behoudt het recht om iemand te allen tijde de toegang tot het festival te ontzeggen.</li>
-                        <li>Een bezoeker&nbsp;die wangedrag vertoont wordt van het evenemententerrein&nbsp;verwijdert of niet toegelaten.</li>
-                    </ul>
-                    <p><strong>De dichtspijker regels:</strong></p>
-                    <ul>
-                        <li>De organisatie&nbsp;van Loungefest behoudt zich het recht voor om het festivalbeleid te allen tijde aan te passen.</li>
-                        <li>Het is verboden om commerciële activiteiten te verrichten op en rondom het festivalterrein zonder toestemming van de Loungefest&nbsp;organisatie.</li>
-                        <li>Geluidssystemen, anders dan die van de organisatie zelf, zijn niet toegestaan op of rondom het festivalterrein.</li>
-                        <li>Video en geluidsopnamen die gemaakt worden op Loungefest mogen niet voor commerciele doeleinden worden gebruikt zonder toestemming van de organisatie van Loungefest.</li>
-                        <li>De organisatie&nbsp;van Loungefest behoudt zich het recht voor om mensen bij binnenkomst of op het festivalterrein op te nemen op zowel beeld als geluidsdragers. Deze opnamen kunnen worden gebruikt door de organisatie, zonder dat zij hiertoe een vergoeding verschuldigd is aan de bezoekers.</li>
-                        <li>Bezoekers van het festival dienen akkoord te gaan met een strenge fouillering bij de ingang. Personen die in het bezit zijn van verboden middelen worden overgedragen aan de politie.</li>
-                        <li>De organisatie&nbsp;van Loungefest&nbsp;behoudt zich het recht voor om de datum, duur van het evenement,&nbsp;de programmering en de locatie&nbsp;van het festival te wijzigen.</li>
-                        <li>Het bezoeken van Loungefest is op eigen risico.&nbsp;Loungefest is&nbsp;zich niet verantwoordelijk voor schade aan bezittingen van bezoekers.</li>
-                        <li>Het geluid van onze podia kan door sommige als hard worden ervaren.. De organisatie is niet aansprakelijk voor enige gehoorbeschadiging die eventueel mocht ontstaan..</li>
-                    </ul>
-                    <p><em>Don't forget to brush your teeth!</em></p>
-                </AccordionItem>
-
-                <AccordionItem title="Fiets" id="fiets">
-                    <p>Kom je met de fiets?</p>
-                    <ol>
-                        <li>Parkeer (gratis) in de fietsenstalling, navigatieadres: Boekhorsterweg 18 te Noordwijkerhout</li>
-                        <li>Loop vanaf hier naar Loungefest</li>
-                    </ol>
-                </AccordionItem>
-
-                <AccordionItem title="Duurzaamheid" id="duurzaamheid">
-                    <p>De organisatie van Loungefest maakt met dankbaarheid gebruik van het Oosterduinse meer als festivallocatie en vindt het belangrijk dat deze prachtige en natuurrijke omgeving zo min mogelijk belast wordt. Om dit voor elkaar te krijgen nemen wij diverse maatregelen:</p>
-                    <ol>
-                        <li><strong>Duurzaam vervoer</strong></li>
-                        <li><strong>Energie</strong></li>
-                        <li><strong>Recyclen van plastic</strong></li>
-                        <li><strong>Duurzame catering</strong></li>
-                    </ol>
-                    <p><em>Do you wanna be green and clean?!</em></p>
-                    <p>Wil je ons graag helpen om de impact van Loungefest op het milieu te verkleinen, help dan met: het scheiden van plastic op Loungefest in de daarvoor bestemde plastic afvalbakken of verzamel een meter bekers en lever die in voor een leuk cadeautje!</p>
-                </AccordionItem>
-
-                <AccordionItem title="Contact" id="contact">
-                    <ul>
-                        <li><strong>Voor bezoekers:</strong><br>Boekhorsterweg 18&nbsp;<br>2211 AL, Noordwijkerhout<br>Mail algemeen:&nbsp;<a href="mailto:info@loungefest.nl">info@loungefest.nl</a><br>Mail tickets:&nbsp;<a href="mailto:ticketing@loungefest.nl">ticketing@loungefest.nl</a><br>Telefoon: <a href="tel:+31628883981">06-2888 3981</a></li>
-                        <li><strong>Financiële zaken:</strong><br>Naam: Stichting N.Y.C.E.<br>Adres: Leeweg&nbsp;1, 2211 XZ Noordwijkerhout, Nederland<br>Rabobank-nummer:&nbsp;NL81 RABO 0119 1856 01&nbsp;<br>Kvk-nummer:&nbsp;56181655<br>BTW-nummer: NL852008995B01<br>Mail:&nbsp;<a href="mailto:administratie@loungefest.nl">administratie@loungefest.nl</a></li>
-                    </ul>
-                </AccordionItem>
-
-                <AccordionItem title="Beschrijving" id="beschrijving">
-                    <p>Loungefest is een tweedaags festival (17 &amp; 18 juli 2026)</p>
-                    <ol>
-                        <li>O&#xFEFF;p 17 juli: evenemtenterrein deels geopend</li>
-                        <li>O&#xFEFF;p 18 juli: evenemtenterrein volledig geopend</li>
-                    </ol>
-                </AccordionItem>
-
-                <AccordionItem title="Auto" id="auto">
-                    <p>Kom je met de auto?</p>
-                    <ol>
-                        <li>Parkeer (gratis) op de openbare parkeerplaats De Brink in Noordwijkerhout</li>
-                        <li>Neem de pendelservice tussen De Brink en Loungefest</li>
-                    </ol>
-                </AccordionItem>
+                {infos.map((info) => (
+                    <AccordionItem title={info.title} id={info.id}>
+                        <div class="whitespace-pre-line">
+                            {info.description}
+                        </div>
+                    </AccordionItem>
+                ))}
             </div>
 
             <!-- "Verkocht?" Section -->
