@@ -23,7 +23,15 @@ export default async function fetchApi<T>({
     endpoint = endpoint.slice(1);
   }
 
-  const url = new URL(`${import.meta.env.STRAPI_URL}/api/${endpoint}`);
+  const strapiUrl = import.meta.env.STRAPI_URL;
+
+  if (!strapiUrl) {
+    throw new Error(
+      "STRAPI_URL is not defined in your environment variables. Please check your .env file or GitHub Secrets."
+    );
+  }
+
+  const url = new URL(`${strapiUrl}/api/${endpoint}`);
 
   if (query) {
     Object.entries(query).forEach(([key, value]) => {
