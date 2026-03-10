@@ -6,11 +6,12 @@ import fetchApi, { getStrapiMedia } from '../../lib/strapi';
 import { Image } from 'astro:assets';
 import heroImage from '../../assets/images/lf-hero.jpg';
 
-type Performance = { datetime?: string; day?: string; time?: string };
+type Performance = { datetime?: string; day?: string; time?: string; podium?: any };
 
 type NormalizedPerformance = {
     day: string;
     time: string;
+    podium?: string;
 };
 
 const dayFormatter = new Intl.DateTimeFormat('nl-NL', {
@@ -27,7 +28,15 @@ const timeFormatter = new Intl.DateTimeFormat('nl-NL', {
 
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-const normalizePerformance = (performance: Performance): NormalizedPerformance | null => {
+const normalizePerformance = (performance: Performance, artistPodium?: any): NormalizedPerformance | null => {
+    const podiumName =
+        performance?.podium?.data?.attributes?.title ||
+        performance?.podium?.title ||
+        (typeof performance?.podium === 'string' ? performance.podium : null) ||
+        artistPodium?.data?.attributes?.title ||
+        artistPodium?.title ||
+        (typeof artistPodium === 'string' ? artistPodium : null);
+
     if (typeof performance?.datetime === 'string') {
         const date = new Date(performance.datetime);
 
@@ -35,6 +44,7 @@ const normalizePerformance = (performance: Performance): NormalizedPerformance |
             return {
                 day: capitalize(dayFormatter.format(date)),
                 time: timeFormatter.format(date),
+                podium: podiumName,
             };
         }
     }
@@ -43,6 +53,7 @@ const normalizePerformance = (performance: Performance): NormalizedPerformance |
         return {
             day: performance.day,
             time: performance?.time || 't.b.d.',
+            podium: podiumName,
         };
     }
 
@@ -54,7 +65,13 @@ type StrapiArtist = {
     name?: string;
     priority?: number;
     image?: any;
+    podium?: any;
     performances?: Performance[];
+    attributes?: any;
+};
+
+type StrapiPodium = {
+    title: string;
     attributes?: any;
 };
 
@@ -64,9 +81,26 @@ const rawArtists = await fetchApi<StrapiArtist[]>({
     query: {
         'sort[0]': 'priority:desc',
         'sort[1]': 'name:asc',
-        populate: '*',
+        'populate[0]': 'image',
+        'populate[1]': 'podium',
+        'populate[2]': 'performances',
     },
 });
+
+const rawPodia = await fetchApi<StrapiPodium[]>({
+    endpoint: 'podia',
+    wrappedByKey: 'data',
+    query: {
+        'sort[0]': 'title:asc',
+    },
+});
+
+const podia = (rawPodia ?? [])
+    .map((item) => {
+        const podium = item?.attributes ?? item;
+        return podium.title;
+    })
+    .filter(Boolean);
 
 const artists = (rawArtists ?? [])
     .map((item) => {
@@ -75,7 +109,7 @@ const artists = (rawArtists ?? [])
 
         const performances = Array.isArray(artist?.performances)
             ? artist.performances
-                .map((performance: Performance) => normalizePerformance(performance))
+                .map((performance: Performance) => normalizePerformance(performance, artist?.podium))
                 .filter((performance): performance is NormalizedPerformance => Boolean(performance))
             : [];
 
@@ -83,17 +117,30 @@ const artists = (rawArtists ?? [])
             ? [...new Set(performances.map((performance) => performance.day))]
             : [];
 
+        const artistPodiumName =
+            artist?.podium?.data?.attributes?.title ||
+            artist?.podium?.title ||
+            (typeof artist?.podium === 'string' ? artist.podium : null);
+
+        const artistPodia = performances.length
+            ? [...new Set(performances.map((p) => p.podium).filter(Boolean))]
+            : artistPodiumName ? [artistPodiumName] : [];
+
         const scheduleLabel = performances.length
             ? performances
-                .map((performance) => `${performance.day} - ${performance.time}`)
+                .map((performance) => {
+                    const label = `${performance.day} - ${performance.time}`;
+                    return performance.podium ? `${label} - ${performance.podium}` : label;
+                })
                 .join(' · ')
-            : 'Tijd volgt';
+            : artistPodiumName ? `Tijd volgt - ${artistPodiumName}` : 'Tijd volgt';
 
         return {
             slug: artist?.slug ?? '',
             name: artist?.name ?? '',
             imageUrl: getStrapiMedia(imageMedia) ?? heroImage.src,
             days,
+            podia: artistPodia,
             scheduleLabel,
         };
     })
@@ -120,10 +167,19 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
                 Programma
             </h1>
 
-            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-20" id="filter-buttons">
-                <Button variant="sky" size="md" data-filter="all">Alles</Button>
-                <Button variant="outline" size="md" data-filter="Vrijdag">Vrijdag</Button>
-                <Button variant="outline" size="md" data-filter="Zaterdag">Zaterdag</Button>
+            <!-- Day filter -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8" id="day-filters">
+                <Button variant="sky" size="md" data-day="all">Alle dagen</Button>
+                <Button variant="outline" size="md" data-day="Vrijdag">Vrijdag</Button>
+                <Button variant="outline" size="md" data-day="Zaterdag">Zaterdag</Button>
+            </div>
+
+            <!-- Podium filter -->
+            <div class="flex flex-wrap justify-center gap-4 mb-20" id="podium-filters">
+                <Button variant="magenta" size="md" data-podium="all">Alle podia</Button>
+                {podia.map((podium) => (
+                    <Button variant="outline" size="md" data-podium={podium}>{podium}</Button>
+                ))}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-x-12 md:gap-y-16">
@@ -132,6 +188,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
                         href={`${base}programma/${artist.slug}`}
                         class="group artist-card block"
                         data-days={artist.days.join(',')}
+                        data-podia={artist.podia.join(',')}
                     >
                         <div class="aspect-square overflow-hidden rounded-[2.5rem] mb-6 bg-plum-800 shadow-xl">
                             <img
@@ -157,41 +214,66 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
 <script>
     const setupFilters = () => {
-        const filterButtons = document.querySelectorAll('#filter-buttons [data-filter]');
+        const dayButtons = document.querySelectorAll('#day-filters [data-day]');
+        const podiumButtons = document.querySelectorAll('#podium-filters [data-podium]');
         const artistCards = document.querySelectorAll('.artist-card');
 
         // Classes to swap for button states
-        const activeClasses = ['bg-sky', 'hover:shadow-sky/20', 'hover:scale-105', 'shadow-xl'];
+        const activeDayClasses = ['bg-sky', 'hover:shadow-sky/20', 'hover:scale-105', 'shadow-xl'];
+        const activePodiumClasses = ['bg-magenta', 'hover:shadow-magenta/20', 'hover:scale-105', 'shadow-xl'];
         const inactiveClasses = ['border-2', 'border-white', 'hover:bg-white', 'hover:text-plum'];
 
-        filterButtons.forEach(button => {
+        let activeDay = 'all';
+        let activePodium = 'all';
+
+        const updateFilters = () => {
+            artistCards.forEach(card => {
+                const days = (card.getAttribute('data-days') || '')
+                    .split(',')
+                    .map((d) => d.trim())
+                    .filter(Boolean);
+
+                const podia = (card.getAttribute('data-podia') || '')
+                    .split(',')
+                    .map((p) => p.trim())
+                    .filter(Boolean);
+
+                const dayMatch = activeDay === 'all' || days.includes(activeDay);
+                const podiumMatch = activePodium === 'all' || podia.includes(activePodium);
+
+                if (dayMatch && podiumMatch) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        };
+
+        const updateButtonStyles = (buttons, activeValue, attr, activeClasses) => {
+            buttons.forEach(btn => {
+                if (btn.getAttribute(attr) === activeValue) {
+                    btn.classList.add(...activeClasses);
+                    btn.classList.remove(...inactiveClasses);
+                } else {
+                    btn.classList.remove(...activeClasses);
+                    btn.classList.add(...inactiveClasses);
+                }
+            });
+        };
+
+        dayButtons.forEach(button => {
             button.addEventListener('click', () => {
-                const filter = button.getAttribute('data-filter');
+                activeDay = button.getAttribute('data-day');
+                updateButtonStyles(dayButtons, activeDay, 'data-day', activeDayClasses);
+                updateFilters();
+            });
+        });
 
-                // Update button styles
-                filterButtons.forEach(btn => {
-                    if (btn === button) {
-                        btn.classList.add(...activeClasses);
-                        btn.classList.remove(...inactiveClasses);
-                    } else {
-                        btn.classList.remove(...activeClasses);
-                        btn.classList.add(...inactiveClasses);
-                    }
-                });
-
-                // Filter artists
-                artistCards.forEach(card => {
-                    const days = (card.getAttribute('data-days') || '')
-                        .split(',')
-                        .map((d) => d.trim())
-                        .filter(Boolean);
-
-                    if (filter === 'all' || days.includes(filter)) {
-                        card.classList.remove('hidden');
-                    } else {
-                        card.classList.add('hidden');
-                    }
-                });
+        podiumButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                activePodium = button.getAttribute('data-podium');
+                updateButtonStyles(podiumButtons, activePodium, 'data-podium', activePodiumClasses);
+                updateFilters();
             });
         });
     };

@@ -5,11 +5,12 @@ import TicketsCTA from '../../components/sections/TicketsCTA.astro';
 import fetchApi, { getStrapiMedia } from '../../lib/strapi';
 import heroImage from '../../assets/images/lf-hero.jpg';
 
-type Performance = { datetime?: string; day?: string; time?: string };
+type Performance = { datetime?: string; day?: string; time?: string; podium?: any };
 
 type NormalizedPerformance = {
     day: string;
     time: string;
+    podium?: string;
 };
 
 type StrapiArtist = {
@@ -18,6 +19,7 @@ type StrapiArtist = {
     day?: string;
     time?: string;
     image?: any;
+    podium?: any;
     description?: unknown;
     performances?: Performance[];
     youtubeLink?: string;
@@ -31,6 +33,7 @@ type ArtistPageData = {
     imageUrl: string;
     description: string;
     performances: NormalizedPerformance[];
+    podium?: string;
     youtubeLink?: string;
     spotifyLink?: string;
 };
@@ -50,7 +53,15 @@ export async function getStaticPaths() {
 
     const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-    const normalizePerformance = (performance: Performance): NormalizedPerformance | null => {
+    const normalizePerformance = (performance: Performance, artistPodium?: any): NormalizedPerformance | null => {
+        const podiumName =
+            performance?.podium?.data?.attributes?.title ||
+            performance?.podium?.title ||
+            (typeof performance?.podium === 'string' ? performance.podium : null) ||
+            artistPodium?.data?.attributes?.title ||
+            artistPodium?.title ||
+            (typeof artistPodium === 'string' ? artistPodium : null);
+
         if (typeof performance?.datetime === 'string') {
             const date = new Date(performance.datetime);
 
@@ -58,6 +69,7 @@ export async function getStaticPaths() {
                 return {
                     day: capitalize(dayFormatter.format(date)),
                     time: timeFormatter.format(date),
+                    podium: podiumName,
                 };
             }
         }
@@ -66,6 +78,7 @@ export async function getStaticPaths() {
             return {
                 day: performance.day,
                 time: performance?.time || 't.b.d.',
+                podium: podiumName,
             };
         }
 
@@ -100,7 +113,9 @@ export async function getStaticPaths() {
         query: {
             'sort[0]': 'priority:desc',
             'sort[1]': 'name:asc',
-            populate: '*',
+            'populate[0]': 'image',
+            'populate[1]': 'podium',
+            'populate[2]': 'performances',
         },
     });
 
@@ -109,9 +124,14 @@ export async function getStaticPaths() {
             const artist = item?.attributes ?? item;
             const imageMedia = artist?.image?.data ?? artist?.image;
 
+            const artistPodiumName =
+                artist?.podium?.data?.attributes?.title ||
+                artist?.podium?.title ||
+                (typeof artist?.podium === 'string' ? artist.podium : null);
+
             const performances = Array.isArray(artist?.performances)
                 ? artist.performances
-                    .map((performance: Performance) => normalizePerformance(performance))
+                    .map((performance: Performance) => normalizePerformance(performance, artist?.podium))
                     .filter((performance): performance is NormalizedPerformance => Boolean(performance))
                 : [];
 
@@ -121,6 +141,7 @@ export async function getStaticPaths() {
                 imageUrl: getStrapiMedia(imageMedia) ?? heroImage.src,
                 description: extractDescription(artist?.description),
                 performances,
+                podium: artistPodiumName,
                 youtubeLink: artist?.youtubeLink,
                 spotifyLink: artist?.spotifyLink,
             };
@@ -179,22 +200,48 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
                     <div class="flex flex-wrap gap-4 mb-10">
                         {artist.performances.length > 0 ? (
                             artist.performances.map((performance) => (
-                                <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                    </svg>
-                                    <span class="font-bold text-xl uppercase tracking-wider">
-                                        {performance.day} - {performance.time || 't.b.d.'}
-                                    </span>
-                                </div>
+                                <>
+                                    <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                        </svg>
+                                        <span class="font-bold text-xl uppercase tracking-wider">
+                                            {performance.day} - {performance.time || 't.b.d.'}
+                                        </span>
+                                    </div>
+                                    {performance.podium && (
+                                        <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                            </svg>
+                                            <span class="font-bold text-xl uppercase tracking-wider">
+                                                {performance.podium}
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
                             ))
                         ) : (
-                            <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span class="font-bold text-xl uppercase tracking-wider">Tijd volgt</span>
-                            </div>
+                            <>
+                                <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="font-bold text-xl uppercase tracking-wider">Tijd volgt</span>
+                                </div>
+                                {artist.podium && (
+                                    <div class="flex items-center gap-2 bg-plum/50 px-6 py-3 rounded-full border border-plum-300/30 backdrop-blur-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-magenta">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                        </svg>
+                                        <span class="font-bold text-xl uppercase tracking-wider">
+                                            {artist.podium}
+                                        </span>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
