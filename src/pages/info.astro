@@ -13,6 +13,11 @@ type StrapiInfo = {
     attributes?: any;
 };
 
+interface StrapiGlobal {
+    showTicketButton: boolean;
+    attributes?: any;
+}
+
 const extractText = (blocks: any): string => {
     if (typeof blocks === 'string') return blocks;
     if (Array.isArray(blocks)) {
@@ -40,6 +45,14 @@ const rawInfos = await fetchApi<StrapiInfo[]>({
         'sort[0]': 'priority:asc',
     },
 });
+
+const globalData = await fetchApi<StrapiGlobal>({
+    endpoint: 'global',
+    wrappedByKey: 'data',
+});
+
+const global = globalData?.attributes ?? globalData;
+const showTicketButton = global?.showTicketButton ?? true;
 
 const infos = (rawInfos ?? [])
     .map((item) => {
@@ -69,7 +82,7 @@ const infos = (rawInfos ?? [])
     </section>
 
     <!-- Content Section -->
-    <section class="bg-plum py-24 text-white min-h-screen">
+    <section class="bg-plum py-24 text-white">
         <div class="container mx-auto px-4 max-w-4xl">
             <h1 class="text-center font-display text-5xl sm:text-7xl md:text-9xl font-bold mb-20 tracking-tight text-magenta">
                 Informatie
@@ -86,14 +99,16 @@ const infos = (rawInfos ?? [])
             </div>
 
             <!-- "Verkocht?" Section -->
-            <div class="text-center py-12">
-                <h2 class="font-display text-6xl md:text-8xl font-bold mb-8 text-magenta">
-                    Verkocht?
-                </h2>
-                <Button href="/tickets" variant="outline" size="xl">
-                    Tickets kopen
-                </Button>
-            </div>
+            {showTicketButton && (
+                <div class="text-center py-12">
+                    <h2 class="font-display text-6xl md:text-8xl font-bold mb-8 text-magenta">
+                        Verkocht?
+                    </h2>
+                    <Button href="/tickets" variant="outline" size="xl">
+                        Tickets kopen
+                    </Button>
+                </div>
+            )}
         </div>
     </section>
 </Layout>

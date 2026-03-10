@@ -1,25 +1,49 @@
 ---
 import Button from '../ui/Button.astro';
-import { Image } from 'astro:assets';
 import heroImage from '../../assets/images/lf-hero.jpg';
+import fetchApi, { getStrapiMedia } from '../../lib/strapi';
 
-const podia = [
-    {
-        name: 'Adanses',
-        description: 'Hier komt een stukje tekst over het Adanses podium. Wat voor soort muziekgenre hier gespeeld gaat worden.',
-        image: heroImage,
-    },
-    {
-        name: 'Lakeside',
-        description: 'Geniet van relaxte beats met uitzicht op het water. De perfecte plek om even helemaal tot rust te komen.',
-        image: heroImage,
-    },
-    {
-        name: 'The Forest',
-        description: 'Verscholen tussen de bomen vind je de meest verrassende acts en een magische sfeer.',
-        image: heroImage,
+interface StrapiPodium {
+    title: string;
+    description: any;
+    image: any;
+    attributes?: any;
+}
+
+const extractText = (blocks: any): string => {
+    if (typeof blocks === 'string') return blocks;
+    if (Array.isArray(blocks)) {
+        return blocks
+            .flatMap((block: any) => (Array.isArray(block?.children)
+                ? block.children.map((child: any) => child?.text)
+                : []))
+            .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+            .join(' ')
+            .trim();
     }
-];
+    return '';
+};
+
+const rawPodia = await fetchApi<StrapiPodium[]>({
+    endpoint: 'podia',
+    wrappedByKey: 'data',
+    query: {
+        populate: '*',
+    },
+});
+
+const podia = (rawPodia ?? [])
+    .map((item) => {
+        const podium = item?.attributes ?? item;
+        const imageMedia = podium?.image?.data ?? podium?.image;
+
+        return {
+            name: podium?.title ?? '',
+            description: extractText(podium?.description),
+            image: getStrapiMedia(imageMedia) ?? heroImage.src,
+        };
+    })
+    .filter((podium) => podium.name);
 ---
 
 <section class="relative pt-24 pb-16 overflow-hidden">
@@ -43,10 +67,11 @@ const podia = [
 
                         <div class="relative group max-w-md mx-auto mb-12">
                             <div class="aspect-square overflow-hidden rounded-[3rem] shadow-2xl">
-                                <Image
+                                <img
                                     src={podium.image}
                                     alt={podium.name}
                                     class="h-full w-full object-cover"
+                                    loading="lazy"
                                 />
                             </div>
 

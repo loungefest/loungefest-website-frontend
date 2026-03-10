@@ -3,6 +3,25 @@ import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import EasterEggs from "../components/visuals/EasterEggs.astro";
 import "../styles/global.css";
+import fetchApi from "../lib/strapi";
+
+interface StrapiGlobal {
+	siteName: string;
+	siteDescription: string;
+	showTicketButton: boolean;
+	attributes?: any;
+}
+
+const globalData = await fetchApi<StrapiGlobal>({
+	endpoint: 'global',
+	wrappedByKey: 'data',
+});
+
+const global = globalData?.attributes ?? globalData;
+
+const siteName = global?.siteName ?? "Loungefest | Noordwijkerhout | Comomeer";
+const siteDescription = global?.siteDescription ?? "Zin in het gezelligste feestje van de Bollenstreek? Kom naar Loungefest! Ontdek nieuwe bands, dans bij de lola's en beleef een onvergetelijk weekend. Mis het niet en koop nu je kaarten.";
+const showTicketButton = global?.showTicketButton ?? true;
 
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
@@ -15,14 +34,15 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 		<link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
 		<link rel="icon" href={`${base}favicon.ico`} />
 		<meta name="generator" content={Astro.generator} />
-		<title>Loungefest | Noordwijkerhout | Comomeer</title>
+		<title>{siteName}</title>
+		<meta name="description" content={siteDescription} />
 	</head>
 	<body class="flex flex-col min-h-screen">
-		<Header />
+		<Header showTicketButton={showTicketButton} />
 		<main class="flex-grow">
 			<slot />
 		</main>
-		<Footer />
+		<Footer showTicketButton={showTicketButton} />
 		<EasterEggs />
 	</body>
 </html>

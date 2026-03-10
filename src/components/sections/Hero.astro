@@ -3,6 +3,57 @@ import { Image } from 'astro:assets';
 import LoungefestLogoBlock from '../logo/LoungefestLogoBlock.astro';
 import Button from '../ui/Button.astro';
 import heroImage from '../../assets/images/lf-hero.jpg';
+import fetchApi from '../../lib/strapi';
+
+interface StrapiHeader {
+    title: string;
+    subTitle: string;
+    description: any;
+    buttonText: string;
+    buttonLink: string;
+    buttonEnabled: boolean;
+    attributes?: any;
+}
+
+interface StrapiGlobal {
+    showTicketButton: boolean;
+    attributes?: any;
+}
+
+const headerData = await fetchApi<StrapiHeader>({
+    endpoint: 'header',
+    wrappedByKey: 'data',
+});
+
+const globalData = await fetchApi<StrapiGlobal>({
+    endpoint: 'global',
+    wrappedByKey: 'data',
+});
+
+const header = headerData?.attributes ?? headerData;
+const global = globalData?.attributes ?? globalData;
+
+const extractText = (blocks: any): string => {
+    if (typeof blocks === 'string') return blocks.trim();
+    if (Array.isArray(blocks)) {
+        return blocks
+            .flatMap((block: any) => (Array.isArray(block?.children)
+                ? block.children.map((child: any) => child?.text)
+                : []))
+            .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+            .join(' ')
+            .trim();
+    }
+    return '';
+};
+
+const title = header?.title ?? "17 & 18 juli 2026";
+const subTitle = header?.subTitle ?? "Oosterduinse Meer - Noordwijkerhout";
+const description = extractText(header?.description) || "Welkom bij Loungefest, hét festival waar muziek, sfeer en gezelligheid samenkomen in het hart van Noordwijkerhout! Laat je meevoeren door relaxte loungemuziek, zomerse beats en live acts terwijl je geniet van een ongedwongen festivalsfeer.";
+const buttonText = header?.buttonText ?? "Tickets kopen";
+const buttonLink = header?.buttonLink ?? "/tickets";
+const buttonEnabled = header?.buttonEnabled ?? true;
+const showTicketButton = global?.showTicketButton ?? true;
 ---
 
 <section class="relative min-h-screen flex items-center justify-center overflow-hidden py-16 pb-32">
@@ -32,27 +83,29 @@ import heroImage from '../../assets/images/lf-hero.jpg';
 
             <!-- Date -->
             <h1 class="font-display font-bold text-5xl sm:text-6xl md:text-8xl mb-2 text-magenta drop-shadow-lg tracking-tight">
-                17 & 18 juli 2026
+                {title}
             </h1>
 
             <!-- Location -->
             <p class="font-display font-medium text-lg sm:text-2xl md:text-3xl mb-8 drop-shadow-md tracking-wide">
-                Oosterduinse Meer - Noordwijkerhout
+                {subTitle}
             </p>
 
             <!-- Description text -->
-            <p class="text-md sm:text-lg md:text-xl mb-12 leading-relaxed drop-shadow-md font-sans font-medium">
-                Welkom bij Loungefest, hét festival waar muziek, sfeer en gezelligheid samenkomen in het hart van Noordwijkerhout! Laat je meevoeren door relaxte loungemuziek, zomerse beats en live acts terwijl je geniet van een ongedwongen festivalsfeer.
+            <p class="text-md sm:text-lg md:text-xl mb-12 leading-relaxed drop-shadow-md font-sans font-medium whitespace-pre-line">
+                {description}
             </p>
 
             <!-- Call to Action -->
-            <Button
-                href="/tickets"
-                variant="primary"
-                size="xl"
-            >
-                Tickets kopen
-            </Button>
+            {buttonEnabled && showTicketButton && (
+                <Button
+                    href={buttonLink}
+                    variant="primary"
+                    size="xl"
+                >
+                    {buttonText}
+                </Button>
+            )}
         </div>
     </div>
 </section>

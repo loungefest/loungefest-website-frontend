@@ -1,6 +1,37 @@
 ---
 import Button from '../ui/Button.astro';
 import LoungefestIcon from '../logo/LoungefestIcon.astro';
+import fetchApi from '../../lib/strapi';
+
+interface StrapiNewsletter {
+    title: string;
+    description: any;
+    attributes?: any;
+}
+
+const newsletterData = await fetchApi<StrapiNewsletter>({
+    endpoint: 'newsletter',
+    wrappedByKey: 'data',
+});
+
+const newsletter = newsletterData?.attributes ?? newsletterData;
+
+const extractText = (blocks: any): string => {
+    if (typeof blocks === 'string') return blocks.trim();
+    if (Array.isArray(blocks)) {
+        return blocks
+            .flatMap((block: any) => (Array.isArray(block?.children)
+                ? block.children.map((child: any) => child?.text)
+                : []))
+            .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+            .join(' ')
+            .trim();
+    }
+    return '';
+};
+
+const title = newsletter?.title ?? "Blijf op de hoogte!";
+const description = extractText(newsletter?.description) || "Meld je aan voor onze nieuwsbrief en mis niets over de line-up, tickets en meer Loungefest nieuws.";
 
 // Randomize icon position, size, and rotation
 const randomTop = Math.floor(Math.random() * 80) - 10; // Range: -10% to 70%
@@ -28,15 +59,15 @@ const randomRotation = Math.floor(Math.random() * 91) - 45; // Range: -45 to 45 
         <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-16">
             <div class="flex-1 text-center md:text-left">
                 <h2 class="font-display font-bold text-5xl md:text-7xl mb-6 text-plum tracking-tight">
-                    Blijf op de hoogte!
+                    {title}
                 </h2>
                 <p class="text-plum text-xl md:text-2xl font-medium leading-relaxed max-w-xl">
-                    Meld je aan voor onze nieuwsbrief en mis niets over de line-up, tickets en meer Loungefest nieuws.
+                    {description}
                 </p>
             </div>
 
             <div class="w-full md:w-[400px]">
-                <form class="flex flex-col gap-4">
+                <form id="newsletter-form" class="flex flex-col gap-4" data-strapi-url={import.meta.env.STRAPI_URL}>
                     <input
                         type="email"
                         name="email"
@@ -44,11 +75,77 @@ const randomRotation = Math.floor(Math.random() * 91) - 45; // Range: -45 to 45 
                         required
                         class="w-full px-8 py-4 rounded-full bg-white text-plum text-xl focus:outline-none focus:ring-4 focus:ring-plum/20 placeholder:text-plum/40 font-sans border-none"
                     />
-                    <Button type="submit" variant="plum" size="xl" class="w-full">
+                    <Button id="newsletter-submit" type="submit" variant="plum" size="xl" class="w-full">
                         Inschrijven
                     </Button>
+                    <div id="newsletter-message" class="text-center font-bold min-h-[1.5rem] transition-all duration-300 text-plum"></div>
                 </form>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    const initNewsletterForm = () => {
+        const form = document.getElementById('newsletter-form') as HTMLFormElement;
+        const messageDiv = document.getElementById('newsletter-message');
+        const submitBtn = document.getElementById('newsletter-submit');
+        const strapiUrl = form?.dataset.strapiUrl;
+
+        if (!form || !messageDiv || !submitBtn || !strapiUrl) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const email = formData.get('email');
+
+            // Basic UI feedback
+            submitBtn.setAttribute('disabled', 'true');
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+            messageDiv.textContent = 'Versturen...';
+            messageDiv.classList.remove('text-magenta');
+            messageDiv.classList.add('text-plum');
+
+            try {
+                const response = await fetch(`${strapiUrl}/api/newsletter-subscriptions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        data: {
+                            email: email
+                        }
+                    }),
+                });
+
+                if (response.ok) {
+                    messageDiv.textContent = 'Bedankt voor je inschrijving!';
+                    messageDiv.classList.remove('text-plum');
+                    messageDiv.classList.add('text-magenta');
+                    form.reset();
+                } else {
+                    const errorData = await response.json();
+                    if (errorData?.error?.message?.includes('unique')) {
+                        messageDiv.textContent = 'Dit e-mailadres is al aangemeld.';
+                    } else {
+                        messageDiv.textContent = 'Er is iets misgegaan. Probeer het later opnieuw.';
+                    }
+                }
+            } catch (error) {
+                console.error('Newsletter error:', error);
+                messageDiv.textContent = 'Kon geen verbinding maken met de server.';
+            } finally {
+                submitBtn.removeAttribute('disabled');
+                submitBtn.style.opacity = '';
+                submitBtn.style.cursor = '';
+            }
+        });
+    };
+
+    // Run on page load and on Astro view transition
+    document.addEventListener('DOMContentLoaded', initNewsletterForm);
+    document.addEventListener('astro:page-load', initNewsletterForm);
+</script>

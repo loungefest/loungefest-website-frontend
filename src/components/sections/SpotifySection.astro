@@ -1,6 +1,20 @@
 ---
 import LoungefestIcon from '../logo/LoungefestIcon.astro';
 import Button from '../ui/Button.astro';
+import fetchApi from '../../lib/strapi';
+
+interface StrapiGlobal {
+    showTicketButton: boolean;
+    attributes?: any;
+}
+
+const globalData = await fetchApi<StrapiGlobal>({
+    endpoint: 'global',
+    wrappedByKey: 'data',
+});
+
+const global = globalData?.attributes ?? globalData;
+const showTicketButton = global?.showTicketButton ?? true;
 ---
 
 <section class="relative bg-midnight py-24 overflow-hidden flex flex-col items-center">
@@ -31,15 +45,19 @@ import Button from '../ui/Button.astro';
                 loading="lazy"
             ></iframe>
 
+        </div>
+
         <!-- CTA Button -->
-        <Button
-            href="/tickets"
-            variant="outline"
-            color="white"
-            size="md"
-            class="min-w-[240px]"
-        >
-            Tickets LF 2026
-        </Button>
+        {showTicketButton && (
+            <Button
+                href="/tickets"
+                variant="outline"
+                color="white"
+                size="md"
+                class="min-w-[240px]"
+            >
+                Tickets LF 2026
+            </Button>
+        )}
     </div>
 </section>

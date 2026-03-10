@@ -1,6 +1,20 @@
 ---
 import Button from '../ui/Button.astro';
 import LoungefestIcon from '../logo/LoungefestIcon.astro';
+import fetchApi from '../../lib/strapi';
+
+interface StrapiGlobal {
+    showTicketButton: boolean;
+    attributes?: any;
+}
+
+const globalData = await fetchApi<StrapiGlobal>({
+    endpoint: 'global',
+    wrappedByKey: 'data',
+});
+
+const global = globalData?.attributes ?? globalData;
+const showTicketButton = global?.showTicketButton ?? true;
 
 interface Props {
 	title?: string;
@@ -76,6 +90,7 @@ const randomSize = Math.floor(Math.random() * 20) + 15; // Range: 15rem to 35rem
 const randomRotation = Math.floor(Math.random() * 91) - 45; // Range: -45 to 45 degrees
 ---
 
+{showTicketButton && (
 <section class={`relative ${styles.bg} py-24 overflow-hidden`}>
     <!-- Decorative Icon Background -->
     <div 
@@ -110,3 +125,4 @@ const randomRotation = Math.floor(Math.random() * 91) - 45; // Range: -45 to 45 
         </div>
     </div>
 </section>
+)}

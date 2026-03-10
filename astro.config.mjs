@@ -8,7 +8,7 @@ import tailwindcss from '@tailwindcss/vite';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.loungefest.nl',
-  base: process.env.BASE_PATH || '/loungefest-website-frontend/',
+  base: process.env.BASE_PATH || '/',
   integrations: [vue()],
 
   vite: {

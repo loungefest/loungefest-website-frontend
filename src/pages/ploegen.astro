@@ -75,18 +75,15 @@ const ploegen = (rawPloegen ?? [])
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-x-12 md:gap-y-20">
                 {ploegen.map((ploeg) => (
                     <div class="group ploeg-card relative" tabindex="0">
-                        <div class="aspect-square overflow-hidden rounded-[2.5rem] bg-plum-800 shadow-xl relative cursor-pointer">
+                        <div class="aspect-square overflow-hidden rounded-[2.5rem] bg-plum-800 shadow-xl relative cursor-pointer mb-6 transition-all duration-300 group-hover:shadow-2xl group-hover:scale-[1.02]">
                             <img
                                 src={ploeg.image}
                                 alt={ploeg.name}
                                 class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                             <div class="absolute inset-0 bg-white/90 p-8 flex flex-col justify-center items-center text-center backdrop-blur-md opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-all duration-300">
-                                <h3 class="font-display text-3xl font-bold text-plum-900 mb-4 leading-tight">
-                                    {ploeg.name}
-                                </h3>
                                 {ploeg.description && (
-                                    <div class="mb-6 text-plum-900 font-bold text-lg leading-relaxed whitespace-pre-line">
+                                    <div class="mb-6 text-plum-900 font-bold text-lg">
                                         {ploeg.description}
                                     </div>
                                 )}
@@ -97,6 +94,9 @@ const ploegen = (rawPloegen ?? [])
                                 )}
                             </div>
                         </div>
+                        <h3 class="font-display text-3xl font-bold text-center text-white transition-all duration-300 group-hover:scale-110 truncate">
+                            {ploeg.name}
+                        </h3>
                     </div>
                 ))}
             </div>
