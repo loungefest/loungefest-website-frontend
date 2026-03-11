@@ -264,8 +264,8 @@ import makreelImg from '../../assets/images/makreel.png';
 
         animId = requestAnimationFrame(update);
 
-        // Auto-disappear after 25–50 seconds — swim off toward nearest edge
-        const lifetime = 25000 + Math.random() * 25000;
+        // Auto-disappear after 15–30 seconds — swim off toward nearest edge
+        const lifetime = 15000 + Math.random() * 15000;
         const leaveTimer = setTimeout(() => {
             if (!alive) return;
             leaving = true;
