@@ -309,11 +309,12 @@ import makreelImg from '../../assets/images/makreel.png';
             if (e.pointerType === 'touch') {
                 // Block the synthetic click so explosion doesn't fire
                 e.preventDefault();
-                // Burst directly away from the tap point
-                const fx = x + FISH_W / 2;
-                const fy = y + FISH_H / 2;
-                const dx = fx - e.clientX;
-                const dy = fy - e.clientY;
+                // Burst directly away from the tap point using actual rendered center
+                const rect = fish.getBoundingClientRect();
+                const fishCX = rect.left + rect.width  / 2;
+                const fishCY = rect.top  + rect.height / 2;
+                const dx = fishCX - e.clientX;
+                const dy = fishCY - e.clientY;
                 const dist = Math.sqrt(dx * dx + dy * dy) || 1;
                 vx = (dx / dist) * MAX_SPEED * 1.5;
                 vy = (dy / dist) * MAX_SPEED * 1.5;
