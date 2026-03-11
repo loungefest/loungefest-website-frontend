@@ -155,6 +155,8 @@ import makreelImg from '../../assets/images/makreel.png';
         const FLEE_FORCE = 7000;
         const MAX_SPEED = 9;
         const DRAG = 0.88;
+        const WALL_REPEL_RADIUS = 160;
+        const WALL_REPEL_FORCE = 4000;
 
         // Spawn from a random screen edge
         let x: number, y: number;
@@ -208,6 +210,16 @@ import makreelImg from '../../assets/images/makreel.png';
                 } else {
                     fish.classList.remove('fleeing');
                 }
+
+                // Wall repulsion — prevents fish from getting trapped in corners
+                const dLeft   = Math.max(1, fx);
+                const dRight  = Math.max(1, window.innerWidth  - fx);
+                const dTop    = Math.max(1, fy);
+                const dBottom = Math.max(1, window.innerHeight - fy);
+                if (fx < WALL_REPEL_RADIUS)                      vx += WALL_REPEL_FORCE / (dLeft   * dLeft);
+                if (fx > window.innerWidth  - WALL_REPEL_RADIUS) vx -= WALL_REPEL_FORCE / (dRight  * dRight);
+                if (fy < WALL_REPEL_RADIUS)                      vy += WALL_REPEL_FORCE / (dTop    * dTop);
+                if (fy > window.innerHeight - WALL_REPEL_RADIUS) vy -= WALL_REPEL_FORCE / (dBottom * dBottom);
 
                 // Swim toward current wander target for natural movement
                 const wtx = wanderTargetX - fx;
@@ -272,16 +284,22 @@ import makreelImg from '../../assets/images/makreel.png';
             fish.classList.remove('fleeing');
             clearTimeout(wanderTimer);
 
-            const distLeft   = x;
-            const distRight  = window.innerWidth  - (x + FISH_W);
-            const distTop    = y;
-            const distBottom = window.innerHeight - (y + FISH_H);
+            const fx = x + FISH_W / 2;
+            const fy = y + FISH_H / 2;
+            const distLeft   = fx;
+            const distRight  = window.innerWidth  - fx;
+            const distTop    = fy;
+            const distBottom = window.innerHeight - fy;
             const minDist    = Math.min(distLeft, distRight, distTop, distBottom);
 
             if      (minDist === distLeft)   { exitDirX = -1; exitDirY =  0; }
             else if (minDist === distRight)  { exitDirX =  1; exitDirY =  0; }
             else if (minDist === distTop)    { exitDirX =  0; exitDirY = -1; }
             else                             { exitDirX =  0; exitDirY =  1; }
+
+            // Override any flee velocity so the fish heads for the exit immediately
+            vx = exitDirX * MAX_SPEED;
+            vy = exitDirY * MAX_SPEED;
         }, lifetime);
 
         // Desktop click → explode. Mobile tap → sprint away.
