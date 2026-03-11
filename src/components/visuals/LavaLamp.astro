@@ -369,14 +369,25 @@ const {
         resize();
         run();
 
-        // Debounced resize handler
+        // Debounced resize handler with dimension change check
         let resizeTimer: ReturnType<typeof setTimeout>;
+        let lastWidth = container.offsetWidth;
+        let lastHeight = container.offsetHeight;
+
         window.addEventListener('resize', () => {
-            cancelAnimationFrame(animationId);
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                resize();
-                run();
+                const currentWidth = container.offsetWidth;
+                const currentHeight = container.offsetHeight;
+
+                // Only resize if dimensions actually changed
+                if (currentWidth !== lastWidth || currentHeight !== lastHeight) {
+                    lastWidth = currentWidth;
+                    lastHeight = currentHeight;
+                    cancelAnimationFrame(animationId);
+                    resize();
+                    run();
+                }
             }, 150);
         });
     }
