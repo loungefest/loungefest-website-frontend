@@ -9,7 +9,7 @@ interface Props {
 }
 
 const {
-    color = '#6b0f54',
+    color = 'oklch(0.364 0.142 341.53)',
     numBalls = 6,
     ballSize = 1,
     animated = true,
@@ -302,7 +302,7 @@ const {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const color = resolveColor(container.dataset.color || '#6b0f54');
+        const color = resolveColor(container.dataset.color || 'oklch(0.364 0.142 341.53)');
         const numBalls = parseInt(container.dataset.numBalls || '6', 10);
         const ballSizeProp = parseFloat(container.dataset.ballSize || '1');
         const animated = container.dataset.animated !== 'false';
