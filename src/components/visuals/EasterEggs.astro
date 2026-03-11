@@ -1,7 +1,8 @@
 ---
+import makreelImg from '../../assets/images/makreel.png';
 ---
 
-<div id="easter-egg-container" class="fixed inset-0 pointer-events-none z-[9999] overflow-hidden">
+<div id="easter-egg-container" class="fixed inset-0 pointer-events-none z-9999 overflow-hidden" data-makreel-src={makreelImg.src}>
     <!-- Mackerel will be injected here -->
 </div>
 
@@ -10,13 +11,23 @@
         position: fixed;
         width: auto;
         height: auto;
-        font-size: 80px;
-        line-height: 1;
         pointer-events: auto;
         cursor: pointer;
         transition: transform 0.2s;
         z-index: 10000;
         user-select: none;
+    }
+
+    .mackerel img {
+        width: 140px;
+        height: auto;
+        display: block;
+        animation: swim-bob 0.9s ease-in-out infinite;
+    }
+
+    @keyframes swim-bob {
+        0%, 100% { transform: translateY(0px) rotate(-4deg); }
+        50%       { transform: translateY(-12px) rotate(4deg); }
     }
 
     .mackerel:hover {
@@ -114,8 +125,10 @@
 
         const fish = document.createElement('div');
         fish.className = 'mackerel';
-        // Fish emoji
-        fish.textContent = '🐟';
+        const img = document.createElement('img');
+        img.src = (container as HTMLElement).dataset.makreelSrc || '';
+        img.alt = 'makreel';
+        fish.appendChild(img);
 
         const side = Math.random() > 0.5 ? 'left' : 'right';
         const startY = Math.random() * (window.innerHeight - 100);
@@ -126,8 +139,8 @@
         if (side === 'left') {
             fish.style.left = '-200px';
             fish.animate([
-                { left: '-200px', transform: 'scaleX(-1)' },
-                { left: `${window.innerWidth + 200}px`, transform: 'scaleX(-1)' }
+                { left: '-200px', transform: 'scaleX(1)' },
+                { left: `${window.innerWidth + 200}px`, transform: 'scaleX(1)' }
             ], {
                 duration: duration,
                 easing: 'linear'
@@ -135,8 +148,8 @@
         } else {
             fish.style.right = '-200px';
             fish.animate([
-                { right: '-200px', transform: 'scaleX(1)' },
-                { right: `${window.innerWidth + 200}px`, transform: 'scaleX(1)' }
+                { right: '-200px', transform: 'scaleX(-1)' },
+                { right: `${window.innerWidth + 200}px`, transform: 'scaleX(-1)' }
             ], {
                 duration: duration,
                 easing: 'linear'
