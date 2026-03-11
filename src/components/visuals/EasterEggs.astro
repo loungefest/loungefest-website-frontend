@@ -284,8 +284,28 @@ import makreelImg from '../../assets/images/makreel.png';
             else                             { exitDirX =  0; exitDirY =  1; }
         }, lifetime);
 
-        // 💥 Explode on click/tap
-        fish.addEventListener('click', () => {
+        // Desktop click → explode. Mobile tap → sprint away.
+        fish.addEventListener('pointerdown', (e) => {
+            if (!alive) return;
+
+            if (e.pointerType === 'touch') {
+                // Block the synthetic click so explosion doesn't fire
+                e.preventDefault();
+                // Burst directly away from the tap point
+                const fx = x + FISH_W / 2;
+                const fy = y + FISH_H / 2;
+                const dx = fx - e.clientX;
+                const dy = fy - e.clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                vx = (dx / dist) * MAX_SPEED * 1.5;
+                vy = (dy / dist) * MAX_SPEED * 1.5;
+                // Update global threat so flee behavior keeps pushing it away
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                return;
+            }
+
+            // 💥 Mouse click: explode
             alive = false;
             cancelAnimationFrame(animId);
             clearTimeout(leaveTimer);
