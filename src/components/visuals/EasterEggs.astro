@@ -187,10 +187,10 @@
     });
 
     function activatePartyMode() {
-        const partyElements = Array.from(document.body.children).filter(child => 
+        const partyElements = Array.from(document.body.children).filter(child =>
             child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE'
         );
-        
+
         partyElements.forEach(el => el.classList.add('party-mode'));
         console.log("%c🥳 FEESTMODUS GEACTIVEERD!", "color: magenta; font-size: 30px; font-weight: bold; text-shadow: 2px 2px black;");
 
@@ -292,7 +292,10 @@
     let rapidClicks = 0;
     let rapidClickTimer: ReturnType<typeof setTimeout> | null = null;
 
-    document.addEventListener('click', () => {
+    document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('button, a, input, select, textarea, [role="button"]')) return;
+
         rapidClicks++;
         if (rapidClickTimer) clearTimeout(rapidClickTimer);
 
@@ -388,43 +391,4 @@
             easing: 'ease-out'
         }).onfinish = () => trail.remove();
     });
-
-    // 😴 Idle detector: after 2 minutes of no interaction, a sleeping emoji drifts across
-    let idleTimer: ReturnType<typeof setTimeout> | null = null;
-
-    function resetIdleTimer() {
-        if (idleTimer) clearTimeout(idleTimer);
-        idleTimer = setTimeout(spawnSleepyEmoji, 120000);
-    }
-
-    function spawnSleepyEmoji() {
-        const sleepy = document.createElement('div');
-        sleepy.style.position = 'fixed';
-        sleepy.style.fontSize = '50px';
-        sleepy.style.pointerEvents = 'none';
-        sleepy.style.zIndex = '10001';
-        sleepy.textContent = '😴';
-        sleepy.style.bottom = '20px';
-        sleepy.style.right = '-60px';
-        document.body.appendChild(sleepy);
-
-        sleepy.animate([
-            { right: '-60px', opacity: 0, transform: 'translateY(0)' },
-            { right: '20px', opacity: 1, transform: 'translateY(-10px)', offset: 0.3 },
-            { right: '20px', opacity: 1, transform: 'translateY(0)', offset: 0.7 },
-            { right: '-60px', opacity: 0, transform: 'translateY(-10px)' }
-        ], {
-            duration: 6000,
-            easing: 'ease-in-out'
-        }).onfinish = () => {
-            sleepy.remove();
-            console.log("%c😴 Zzz... Ben je er nog? Loungefest wacht op je!", "color: purple; font-size: 16px; font-style: italic;");
-            resetIdleTimer();
-        };
-    }
-
-    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
-        document.addEventListener(evt, resetIdleTimer, { passive: true });
-    });
-    resetIdleTimer();
 </script>

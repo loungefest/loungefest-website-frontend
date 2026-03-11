@@ -88,13 +88,31 @@ const infos = (rawInfos ?? [])
                 Informatie
             </h1>
 
-            <div class="flex flex-col mb-24">
+            <!-- Search -->
+            <div class="mb-10">
+                <input
+                    type="search"
+                    id="info-search"
+                    aria-label="Zoek in informatie"
+                    placeholder="Zoek in informatie..."
+                    class="w-full bg-white/10 border border-white/30 rounded-xl px-5 py-4 text-white placeholder-white/40 focus:outline-none focus:border-magenta text-lg transition-colors"
+                    autocomplete="off"
+                />
+            </div>
+
+            <p id="no-results" class="hidden text-center text-white/50 text-lg py-8">
+                Geen resultaten gevonden.
+            </p>
+
+            <div class="flex flex-col mb-24" id="accordion-list">
                 {infos.map((info) => (
-                    <AccordionItem title={info.title} id={info.id}>
-                        <div class="whitespace-pre-line">
-                            {info.description}
-                        </div>
-                    </AccordionItem>
+                    <div data-info-item data-title={info.title} data-description={info.description}>
+                        <AccordionItem title={info.title} id={info.id}>
+                            <div class="whitespace-pre-line">
+                                {info.description}
+                            </div>
+                        </AccordionItem>
+                    </div>
                 ))}
             </div>
 
@@ -112,3 +130,34 @@ const infos = (rawInfos ?? [])
         </div>
     </section>
 </Layout>
+
+<script>
+    function setupSearch() {
+        const searchInput = document.getElementById('info-search') as HTMLInputElement | null;
+        const items = document.querySelectorAll<HTMLElement>('[data-info-item]');
+        const noResults = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            items.forEach((item) => {
+                const title = (item.dataset.title ?? '').toLowerCase();
+                const description = (item.dataset.description ?? '').toLowerCase();
+                const matches = query === '' || title.includes(query) || description.includes(query);
+
+                item.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            if (noResults) {
+                noResults.classList.toggle('hidden', query === '' || visibleCount > 0);
+            }
+        });
+    }
+
+    setupSearch();
+    document.addEventListener('astro:page-load', setupSearch);
+</script>
