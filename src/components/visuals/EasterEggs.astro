@@ -30,17 +30,8 @@ import makreelImg from '../../assets/images/makreel.png';
         50%       { transform: translateY(-12px) rotate(4deg); }
     }
 
-    .mackerel:hover {
-        transform: scale(1.2) rotate(5deg);
-    }
-
-    .mackerel.clicked {
-        animation: fish-spin 0.5s linear infinite;
-    }
-
-    @keyframes fish-spin {
-        from { transform: rotate(0deg) scale(1.2); }
-        to { transform: rotate(360deg) scale(1.2); }
+    .mackerel.fleeing {
+        filter: drop-shadow(0 0 6px rgba(255, 100, 0, 0.6));
     }
 
     .party-mode {
@@ -120,6 +111,33 @@ import makreelImg from '../../assets/images/makreel.png';
     // 🐟 Mackerel Logic
     const container = document.getElementById('easter-egg-container');
 
+    // Track mouse/touch globally for flee behavior
+    // Start off-screen so fish doesn't flee on spawn before any interaction
+    let mouseX = -9999;
+    let mouseY = -9999;
+    let touchEndTimer: ReturnType<typeof setTimeout> | null = null;
+
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+    // Touch: update threat position on drag
+    document.addEventListener('touchmove', (e) => {
+        if (touchEndTimer) { clearTimeout(touchEndTimer); touchEndTimer = null; }
+        const t = e.touches[0];
+        if (t) { mouseX = t.clientX; mouseY = t.clientY; }
+    }, { passive: true });
+    // Touch: also react to taps (including misses near the fish)
+    document.addEventListener('touchstart', (e) => {
+        if (touchEndTimer) { clearTimeout(touchEndTimer); touchEndTimer = null; }
+        const t = e.touches[0];
+        if (t) { mouseX = t.clientX; mouseY = t.clientY; }
+    }, { passive: true });
+    // After finger lifts, keep threatening briefly then go neutral
+    document.addEventListener('touchend', () => {
+        touchEndTimer = setTimeout(() => { mouseX = -9999; mouseY = -9999; }, 800);
+    });
+
     function createMackerel() {
         if (!container) return;
 
@@ -129,53 +147,185 @@ import makreelImg from '../../assets/images/makreel.png';
         img.src = (container as HTMLElement).dataset.makreelSrc || '';
         img.alt = 'makreel';
         fish.appendChild(img);
+        container.appendChild(fish);
 
-        const side = Math.random() > 0.5 ? 'left' : 'right';
-        const startY = Math.random() * (window.innerHeight - 100);
-        const duration = 10000 + Math.random() * 10000;
+        const FISH_W = 140;
+        const FISH_H = 80;
+        const FLEE_RADIUS = 220;
+        const FLEE_FORCE = 7000;
+        const MAX_SPEED = 9;
+        const DRAG = 0.88;
 
-        fish.style.top = `${startY}px`;
+        // Spawn from a random screen edge
+        let x: number, y: number;
+        const edge = Math.floor(Math.random() * 4);
+        if (edge === 0)      { x = Math.random() * window.innerWidth; y = -FISH_H; }
+        else if (edge === 1) { x = window.innerWidth; y = Math.random() * window.innerHeight; }
+        else if (edge === 2) { x = Math.random() * window.innerWidth; y = window.innerHeight; }
+        else                 { x = -FISH_W; y = Math.random() * window.innerHeight; }
 
-        if (side === 'left') {
-            fish.style.left = '-200px';
-            fish.animate([
-                { left: '-200px', transform: 'scaleX(1)' },
-                { left: `${window.innerWidth + 200}px`, transform: 'scaleX(1)' }
-            ], {
-                duration: duration,
-                easing: 'linear'
-            }).onfinish = () => fish.remove();
-        } else {
-            fish.style.right = '-200px';
-            fish.animate([
-                { right: '-200px', transform: 'scaleX(-1)' },
-                { right: `${window.innerWidth + 200}px`, transform: 'scaleX(-1)' }
-            ], {
-                duration: duration,
-                easing: 'linear'
-            }).onfinish = () => fish.remove();
+        // Initial velocity aimed loosely at screen center
+        const targetX = window.innerWidth  / 2 + (Math.random() - 0.5) * window.innerWidth  * 0.5;
+        const targetY = window.innerHeight / 2 + (Math.random() - 0.5) * window.innerHeight * 0.5;
+        const initAngle = Math.atan2(targetY - y, targetX - x);
+        let vx = Math.cos(initAngle) * (2 + Math.random() * 2);
+        let vy = Math.sin(initAngle) * (2 + Math.random() * 2);
+
+        let alive = true;
+        let animId: number;
+        let leaving = false;
+        let exitDirX = 0;
+        let exitDirY = 0;
+
+        // Wander: pick random on-screen targets and swim toward them
+        let wanderTargetX = 100 + Math.random() * (window.innerWidth  - 200);
+        let wanderTargetY = 100 + Math.random() * (window.innerHeight - 200);
+        let wanderTimer: ReturnType<typeof setTimeout>;
+        function pickWanderTarget() {
+            wanderTargetX = 100 + Math.random() * (window.innerWidth  - 200);
+            wanderTargetY = 100 + Math.random() * (window.innerHeight - 200);
+            wanderTimer = setTimeout(pickWanderTarget, 2000 + Math.random() * 4000);
+        }
+        wanderTimer = setTimeout(pickWanderTarget, 1500 + Math.random() * 2000);
+
+        function update() {
+            if (!alive) return;
+
+            const fx = x + FISH_W / 2;
+            const fy = y + FISH_H / 2;
+
+            if (!leaving) {
+                // Flee from mouse/touch cursor
+                const dx = fx - mouseX;
+                const dy = fy - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < FLEE_RADIUS && dist > 1) {
+                    const force = FLEE_FORCE / (dist * dist);
+                    vx += (dx / dist) * force;
+                    vy += (dy / dist) * force;
+                    fish.classList.add('fleeing');
+                } else {
+                    fish.classList.remove('fleeing');
+                }
+
+                // Swim toward current wander target for natural movement
+                const wtx = wanderTargetX - fx;
+                const wty = wanderTargetY - fy;
+                const wtd = Math.sqrt(wtx * wtx + wty * wty);
+                if (wtd > 30) {
+                    vx += (wtx / wtd) * 0.2;
+                    vy += (wty / wtd) * 0.2;
+                }
+
+                // Drag & clamp
+                vx *= DRAG;
+                vy *= DRAG;
+                const speed = Math.sqrt(vx * vx + vy * vy);
+                if (speed > MAX_SPEED) { vx = (vx / speed) * MAX_SPEED; vy = (vy / speed) * MAX_SPEED; }
+
+                x += vx;
+                y += vy;
+
+                // Bounce off screen edges
+                if (x < 0)                          { x = 0;                          vx =  Math.abs(vx) * 0.7; }
+                if (x > window.innerWidth  - FISH_W) { x = window.innerWidth  - FISH_W; vx = -Math.abs(vx) * 0.7; }
+                if (y < 0)                           { y = 0;                           vy =  Math.abs(vy) * 0.7; }
+                if (y > window.innerHeight - FISH_H) { y = window.innerHeight - FISH_H; vy = -Math.abs(vy) * 0.7; }
+            } else {
+                // Swimming away — accelerate toward exit edge, no bounce
+                vx += exitDirX * 0.5;
+                vy += exitDirY * 0.5;
+                const leaveSpeed = Math.sqrt(vx * vx + vy * vy);
+                const maxLeave = MAX_SPEED * 2;
+                if (leaveSpeed > maxLeave) { vx = (vx / leaveSpeed) * maxLeave; vy = (vy / leaveSpeed) * maxLeave; }
+
+                x += vx;
+                y += vy;
+
+                // Remove once off screen
+                if (x < -FISH_W - 20 || x > window.innerWidth + 20 || y < -FISH_H - 20 || y > window.innerHeight + 20) {
+                    alive = false;
+                    fish.remove();
+                    return;
+                }
+            }
+
+            fish.style.left = `${x}px`;
+            fish.style.top  = `${y}px`;
+
+            // Flip to face direction of travel
+            if (Math.abs(vx) > 0.1) {
+                fish.style.transform = vx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+            }
+
+            animId = requestAnimationFrame(update);
         }
 
+        animId = requestAnimationFrame(update);
+
+        // Auto-disappear after 25–50 seconds — swim off toward nearest edge
+        const lifetime = 25000 + Math.random() * 25000;
+        const leaveTimer = setTimeout(() => {
+            if (!alive) return;
+            leaving = true;
+            fish.classList.remove('fleeing');
+            clearTimeout(wanderTimer);
+
+            const distLeft   = x;
+            const distRight  = window.innerWidth  - (x + FISH_W);
+            const distTop    = y;
+            const distBottom = window.innerHeight - (y + FISH_H);
+            const minDist    = Math.min(distLeft, distRight, distTop, distBottom);
+
+            if      (minDist === distLeft)   { exitDirX = -1; exitDirY =  0; }
+            else if (minDist === distRight)  { exitDirX =  1; exitDirY =  0; }
+            else if (minDist === distTop)    { exitDirX =  0; exitDirY = -1; }
+            else                             { exitDirX =  0; exitDirY =  1; }
+        }, lifetime);
+
+        // 💥 Explode on click/tap
         fish.addEventListener('click', () => {
-            fish.classList.add('clicked');
-            const audio = new Audio('');
-            audio.volume = 0.2;
-            audio.play().catch(() => {});
+            alive = false;
+            cancelAnimationFrame(animId);
+            clearTimeout(leaveTimer);
+            clearTimeout(wanderTimer);
 
-            setTimeout(() => {
-                fish.remove();
-                console.log("%c🐟 Je hebt de Loungefest Makreel gevangen!", "color: blue; font-size: 20px; font-weight: bold;");
-            }, 1000);
+            const rect = fish.getBoundingClientRect();
+            const ecx = rect.left + rect.width  / 2;
+            const ecy = rect.top  + rect.height / 2;
+            fish.remove();
+
+            const particles = ['🐟', '🐟', '🐟', '💥', '✨', '💫', '🌟', '🐠', '🫧', '🎣'];
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.style.cssText = `position:fixed;left:${ecx}px;top:${ecy}px;font-size:${12 + Math.random() * 24}px;pointer-events:none;z-index:10002;`;
+                p.textContent = particles[Math.floor(Math.random() * particles.length)];
+                document.body.appendChild(p);
+
+                const angle = (i / 20) * Math.PI * 2 + Math.random() * 0.5;
+                const d = 70 + Math.random() * 120;
+                const tx = Math.cos(angle) * d;
+                const ty = Math.sin(angle) * d;
+
+                p.animate([
+                    { transform: 'translate(-50%, -50%) scale(1.5)', opacity: 1 },
+                    { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: 400 + Math.random() * 600,
+                    easing: 'ease-out'
+                }).onfinish = () => p.remove();
+            }
+
+            console.log("%c🐟 Je hebt de Loungefest Makreel gevangen!", "color: blue; font-size: 20px; font-weight: bold;");
         });
-
-        container.appendChild(fish);
     }
 
-    // Randomly spawn mackerel
+    // Randomly spawn mackerel (cap at 2 live fish)
     function scheduleNextMackerel() {
         const delay = 30000 + Math.random() * 90000; // 30s to 2m
         setTimeout(() => {
-            createMackerel();
+            if (document.querySelectorAll('.mackerel').length < 2) createMackerel();
             scheduleNextMackerel();
         }, delay);
     }
