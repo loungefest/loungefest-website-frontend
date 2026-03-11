@@ -4,6 +4,7 @@ import LoungefestLogoBlock from '../logo/LoungefestLogoBlock.astro';
 import Button from '../ui/Button.astro';
 import heroImage from '../../assets/images/lf-hero.jpg';
 import fetchApi from '../../lib/strapi';
+import { marked } from 'marked';
 
 interface StrapiHeader {
     title: string;
@@ -49,7 +50,7 @@ const extractText = (blocks: any): string => {
 
 const title = header?.title ?? "17 & 18 juli 2026";
 const subTitle = header?.subTitle ?? "Oosterduinse Meer - Noordwijkerhout";
-const description = extractText(header?.description) || "Welkom bij Loungefest, hét festival waar muziek, sfeer en gezelligheid samenkomen in het hart van Noordwijkerhout! Laat je meevoeren door relaxte loungemuziek, zomerse beats en live acts terwijl je geniet van een ongedwongen festivalsfeer.";
+const description = await marked.parse(extractText(header?.description) || "Welkom bij Loungefest, hét festival waar muziek, sfeer en gezelligheid samenkomen in het hart van Noordwijkerhout! Laat je meevoeren door relaxte loungemuziek, zomerse beats en live acts terwijl je geniet van een ongedwongen festivalsfeer.");
 const buttonText = header?.buttonText ?? "Tickets kopen";
 const buttonLink = header?.buttonLink ?? "/tickets";
 const buttonEnabled = header?.buttonEnabled ?? true;
@@ -92,9 +93,7 @@ const showTicketButton = global?.showTicketButton ?? true;
             </p>
 
             <!-- Description text -->
-            <p class="text-md sm:text-lg md:text-xl mb-12 leading-relaxed drop-shadow-md font-sans font-medium whitespace-pre-line">
-                {description}
-            </p>
+            <div class="text-md sm:text-lg md:text-xl mb-12 leading-relaxed drop-shadow-md font-sans font-medium [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4" set:html={description} />
 
             <!-- Call to Action -->
             {buttonEnabled && showTicketButton && (

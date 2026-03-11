@@ -5,6 +5,7 @@ import Button from '../components/ui/Button.astro';
 import { Image } from 'astro:assets';
 import heroImage from '../assets/images/lf-hero.jpg';
 import fetchApi from '../lib/strapi';
+import { marked } from 'marked';
 
 type StrapiInfo = {
     title: string;
@@ -54,17 +55,19 @@ const globalData = await fetchApi<StrapiGlobal>({
 const global = globalData?.attributes ?? globalData;
 const showTicketButton = global?.showTicketButton ?? true;
 
-const infos = (rawInfos ?? [])
-    .map((item) => {
+const infos = (await Promise.all(
+    (rawInfos ?? []).map(async (item) => {
         const info = item?.attributes ?? item;
         const docId = item?.documentId ?? item?.id ?? '';
+        const descriptionText = extractText(info?.description);
         return {
             title: info?.title ?? '',
-            description: extractText(info?.description),
+            description: descriptionText,
+            descriptionHtml: await marked.parse(descriptionText),
             id: docId.toString() || (info?.title ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         };
     })
-    .filter((info) => info.title);
+)).filter((info) => info.title);
 
 ---
 
@@ -108,9 +111,7 @@ const infos = (rawInfos ?? [])
                 {infos.map((info) => (
                     <div data-info-item data-title={info.title} data-description={info.description}>
                         <AccordionItem title={info.title} id={info.id}>
-                            <div class="whitespace-pre-line">
-                                {info.description}
-                            </div>
+                            <div class="[&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_strong]:font-bold [&_em]:italic [&_a]:underline [&_a]:hover:text-magenta" set:html={info.descriptionHtml} />
                         </AccordionItem>
                     </div>
                 ))}

@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import TicketsCTA from '../components/sections/TicketsCTA.astro';
 import heroImage from '../assets/images/lf-hero.jpg';
 import LavaLamp from "../components/visuals/LavaLamp.astro";
+import { marked } from 'marked';
 
 import fetchApi, { getStrapiMedia } from '../lib/strapi';
 
@@ -37,19 +38,19 @@ const rawPloegen = await fetchApi<StrapiPloeg[]>({
     },
 });
 
-const ploegen = (rawPloegen ?? [])
-    .map((item) => {
+const ploegen = (await Promise.all(
+    (rawPloegen ?? []).map(async (item) => {
         const ploeg = item?.attributes ?? item;
         const imageMedia = ploeg?.image?.data ?? ploeg?.image;
 
         return {
             name: ploeg?.title ?? '',
             image: getStrapiMedia(imageMedia) ?? heroImage.src,
-            description: extractText(ploeg?.description),
+            description: await marked.parse(extractText(ploeg?.description)),
             email: ploeg?.email ?? null,
         };
     })
-    .filter((ploeg) => ploeg.name);
+)).filter((ploeg) => ploeg.name);
 ---
 
 <Layout>
@@ -83,9 +84,7 @@ const ploegen = (rawPloegen ?? [])
                             />
                             <div class="absolute inset-0 bg-white/90 p-8 flex flex-col justify-center items-center text-center backdrop-blur-md opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-all duration-300">
                                 {ploeg.description && (
-                                    <div class="mb-6 text-plum-900 font-bold text-lg">
-                                        {ploeg.description}
-                                    </div>
+                                    <div class="mb-6 text-plum-900 font-bold text-lg [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_strong]:font-extrabold [&_em]:italic" set:html={ploeg.description} />
                                 )}
                                 {ploeg.email && (
                                     <a href={`mailto:${ploeg.email}`} class="text-plum-900 font-bold text-lg underline hover:text-magenta transition-colors">

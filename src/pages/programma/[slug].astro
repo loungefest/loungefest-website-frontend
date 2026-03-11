@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/ui/Button.astro';
 import TicketsCTA from '../../components/sections/TicketsCTA.astro';
 import fetchApi, { getStrapiMedia } from '../../lib/strapi';
+import { marked } from 'marked';
 import heroImage from '../../assets/images/lf-hero.jpg';
 
 type Performance = { datetime?: string; day?: string; time?: string; podium?: any };
@@ -119,8 +120,7 @@ export async function getStaticPaths() {
         },
     });
 
-    return (rawArtists ?? [])
-        .map((item) => {
+    return (await Promise.all((rawArtists ?? []).map(async (item) => {
             const artist = item?.attributes ?? item;
             const imageMedia = artist?.image?.data ?? artist?.image;
 
@@ -139,7 +139,7 @@ export async function getStaticPaths() {
                 slug: artist?.slug ?? '',
                 name: artist?.name ?? '',
                 imageUrl: getStrapiMedia(imageMedia) ?? heroImage.src,
-                description: extractDescription(artist?.description),
+                description: await marked.parse(extractDescription(artist?.description)),
                 performances,
                 podium: artistPodiumName,
                 youtubeLink: artist?.youtubeLink,
@@ -150,8 +150,7 @@ export async function getStaticPaths() {
                 params: { slug: pageArtist.slug },
                 props: { artist: pageArtist },
             };
-        })
-        .filter((entry) => entry.params.slug && entry.props.artist.name);
+        }))).filter((entry) => entry.params.slug && entry.props.artist.name);
 }
 
 const { artist } = Astro.props as { artist: ArtistPageData };
@@ -245,11 +244,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
                         )}
                     </div>
 
-                    <div class="prose prose-xl prose-invert max-w-none mb-12 flex-grow">
-                        <p class="text-2xl leading-relaxed text-white/90 font-medium">
-                            {artist.description}
-                        </p>
-                    </div>
+                    <div class="prose prose-xl prose-invert max-w-none mb-12 flex-grow text-2xl leading-relaxed text-white/90 font-medium [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_strong]:font-bold [&_em]:italic [&_a]:underline" set:html={artist.description} />
 
                     <div class="flex flex-wrap gap-4 mt-auto">
                         {artist.youtubeLink && (
