@@ -37,6 +37,10 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 		<meta name="generator" content={Astro.generator} />
 		<title>{siteName}</title>
 		<meta name="description" content={siteDescription} />
+		<link rel="preload" as="font" type="font/woff2" href="/fonts/ClashDisplay-Semibold.woff2" crossorigin />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" />
 	</head>
 	<body class="flex flex-col min-h-screen">
 		<Header showTicketButton={showTicketButton} />
