@@ -182,6 +182,10 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
                 ))}
             </div>
 
+            <p id="no-results" class="hidden text-center text-white/60 text-xl py-16">
+                Geen artiesten gevonden.
+            </p>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-x-12 md:gap-y-16">
                 {artists.map((artist) => (
                     <a
@@ -239,7 +243,11 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         let activeDay = 'all';
         let activePodium = 'all';
 
+        const noResults = document.getElementById('no-results');
+
         const updateFilters = () => {
+            let visibleCount = 0;
+
             artistCards.forEach(card => {
                 const days = (card.getAttribute('data-days') || '')
                     .split(',')
@@ -256,10 +264,15 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
                 if (dayMatch && podiumMatch) {
                     card.classList.remove('hidden');
+                    visibleCount++;
                 } else {
                     card.classList.add('hidden');
                 }
             });
+
+            if (noResults) {
+                noResults.classList.toggle('hidden', visibleCount > 0);
+            }
         };
 
         const updateButtonStyles = (buttons, activeValue, attr, activeClasses) => {
