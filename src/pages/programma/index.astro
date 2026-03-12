@@ -168,14 +168,14 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
             </h1>
 
             <!-- Day filter -->
-            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8" id="day-filters">
+            <div class="filter-scroll flex flex-nowrap overflow-x-auto sm:flex-wrap sm:justify-center gap-4 mb-8 -mx-4 px-4 sm:mx-0 sm:px-0" id="day-filters">
                 <Button variant="sky" size="md" data-day="all">Alle dagen</Button>
                 <Button variant="outline" size="md" data-day="Vrijdag">Vrijdag</Button>
                 <Button variant="outline" size="md" data-day="Zaterdag">Zaterdag</Button>
             </div>
 
             <!-- Podium filter -->
-            <div class="flex flex-wrap justify-center gap-4 mb-20" id="podium-filters">
+            <div class="filter-scroll flex flex-nowrap overflow-x-auto sm:flex-wrap sm:justify-center gap-4 mb-20 -mx-4 px-4 sm:mx-0 sm:px-0" id="podium-filters">
                 <Button variant="magenta" size="md" data-podium="all">Alle podia</Button>
                 {podia.map((podium) => (
                     <Button variant="outline" size="md" data-podium={podium}>{podium}</Button>
@@ -211,6 +211,19 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
     </section>
     <TicketsCTA variant="lime" />
 </Layout>
+
+<style>
+    .filter-scroll > * {
+        flex-shrink: 0;
+    }
+    .filter-scroll::-webkit-scrollbar {
+        display: none;
+    }
+    .filter-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
 
 <script>
     const setupFilters = () => {

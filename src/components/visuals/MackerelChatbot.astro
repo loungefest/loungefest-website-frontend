@@ -47,11 +47,13 @@ import makreelImg from '../../assets/images/makreel.png';
         flex-direction: column-reverse;
         align-items: flex-end;
         gap: 12px;
+        pointer-events: none;
     }
 
     /* ── Toggle button ── */
     #chatbot-toggle {
         position: relative;
+        pointer-events: auto;
         width: 68px;
         height: 68px;
         border-radius: 50%;
@@ -146,7 +148,7 @@ import makreelImg from '../../assets/images/makreel.png';
     #chat-window[aria-hidden="false"] {
         transform: scale(1) translateY(0);
         opacity: 1;
-        pointer-events: all;
+        pointer-events: auto;
     }
 
     /* Header */
