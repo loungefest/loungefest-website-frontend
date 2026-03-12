@@ -353,8 +353,8 @@ import makreelImg from '../../assets/images/makreel.png';
 
     closeBtn?.addEventListener('click', closeChat);
 
-    // Responses — the mackerel knows nothing
-    const responses = [
+    // Responses for questions (ends with ? or starts with question word)
+    const questionResponses = [
         "Weet ik niet 🤷",
         "Geen idee. Ik ben een vis.",
         "Blub blub... ik heb daar geen antwoord op.",
@@ -364,7 +364,6 @@ import makreelImg from '../../assets/images/makreel.png';
         "Dat gaat mijn petje te boven. Of mijn vin.",
         "Ik ben een makreel, niet een encyclopedie.",
         "Weet ik niet. Weet ik nooit.",
-        "Blub. Blub blub. Nee.",
         "Als ik het wist, zou ik het zeggen. Maar ik weet het niet.",
         "Ik heb een hersenen ter grootte van een erwt. Dus nee.",
         "Misschien weet Ben het?",
@@ -377,7 +376,7 @@ import makreelImg from '../../assets/images/makreel.png';
         "Uw tevredenheid is onze prioriteit. Helaas kan ik u niet helpen. Heeft u verder nog vragen die ik ook niet kan beantwoorden?",
         "Bedankt voor uw geduld. Na deze toon wordt u niet geholpen. *piep*",
         "Ik heb uw vraag genoteerd en doorgestuurd naar een afdeling die er niks mee doet.",
-        // Een echte makreel aan de lijn
+        // Aan de lijn
         "Als u een echte makreel aan de lijn wilt krijgen, raad ik een hengel aan. 🎣",
         "U heeft een makreel aan de lijn! Helaas weet deze makreel het ook niet.",
         "Voor een echte makreel aan de lijn: ga naar het Comomeer met een dobber en wat aas. Succes.",
@@ -385,13 +384,52 @@ import makreelImg from '../../assets/images/makreel.png';
         "U spreekt met de enige makreel die ooit vrijwillig de telefoon heeft opgenomen. En ik weet het niet.",
     ];
 
-    let responseIndex = 0;
+    // Responses for statements / greetings / small talk
+    const statementResponses = [
+        "Blub.",
+        "Interessant. Ik zwem gewoon door.",
+        "Oke. En verder?",
+        "Dat zal best. Ik ben een vis.",
+        "Noted. Blub.",
+        "Ik hoor je. Ik begrijp je niet, maar ik hoor je.",
+        "Hm. Ik weet niet wat ik daarmee moet.",
+        "Dank voor de mededeling. Ik doe er niks mee.",
+        "Als reactie hierop: blub blub.",
+        "Ik knik meelevend, maar ik heb geen nek.",
+        "Boeiend. Ik zwem inmiddels al drie keer in kringetjes.",
+        "Fijn dat je dat deelt. Echt.",
+        "Ik sla dit op in mijn geheugen. Dat duurt nog ongeveer drie seconden.",
+    ];
 
-    function getResponse(): string {
-        // Cycle through in random order
-        const r = responses[responseIndex % responses.length];
-        responseIndex++;
-        return r;
+    // Greetings get a special first response
+    const greetingPatterns = /^(hoi|hallo|hey|hi|goedemorgen|goedemiddag|goedenavond|dag|heej|hé|he)\b/i;
+    const questionPatterns = /^(wie|wat|waar|wanneer|waarom|hoe|welke|welk|hoeveel|mag|kan|is|zijn|heeft|hebben|wil|weet|ken)\b|\?/i;
+
+    let greeted = false;
+
+    const greetingResponses = [
+        "Hoi! Blub blub. Stel gerust een vraag die ik niet kan beantwoorden. 🐟",
+        "Hallo! Ik ben de Loungefest Klantenser-vis. Ik weet nergens iets van, maar ik luister wel.",
+        "Hey! Fijn dat je er bent. Ik helaas niet echt, want ik ben een vis op een website.",
+    ];
+
+    function pickRandom(arr: string[]): string {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function getResponse(text: string): string {
+        const trimmed = text.trim();
+
+        if (!greeted && greetingPatterns.test(trimmed)) {
+            greeted = true;
+            return pickRandom(greetingResponses);
+        }
+
+        if (questionPatterns.test(trimmed)) {
+            return pickRandom(questionResponses);
+        }
+
+        return pickRandom(statementResponses);
     }
 
     function addMessage(text: string, sender: 'user' | 'bot') {
@@ -419,12 +457,6 @@ import makreelImg from '../../assets/images/makreel.png';
         return msg;
     }
 
-    // Shuffle responses on load
-    for (let i = responses.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [responses[i], responses[j]] = [responses[j], responses[i]];
-    }
-
     function handleSend() {
         const text = input?.value.trim();
         if (!text) return;
@@ -436,7 +468,7 @@ import makreelImg from '../../assets/images/makreel.png';
 
         setTimeout(() => {
             typingEl.remove();
-            addMessage(getResponse(), 'bot');
+            addMessage(getResponse(text), 'bot');
         }, delay);
     }
 
