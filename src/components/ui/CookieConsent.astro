@@ -1,0 +1,63 @@
+---
+---
+
+<div id="cookie-banner" class="fixed bottom-6 left-6 z-50 hidden max-w-xs rounded-2xl bg-midnight-900 border border-plum-700/50 p-5 shadow-2xl">
+    <p class="mb-1 font-display font-semibold text-white text-lg leading-tight">Cookies</p>
+    <p class="mb-4 text-sm text-white/70 leading-snug">
+        We gebruiken cookies voor Spotify- en YouTube-embeds. Accepteer om de inhoud te laden.
+    </p>
+    <div class="flex gap-3">
+        <button
+            id="cookie-accept"
+            class="flex-1 rounded-xl bg-magenta px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90 cursor-pointer"
+        >
+            Accepteren
+        </button>
+        <button
+            id="cookie-decline"
+            class="flex-1 rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white/70 transition-colors hover:text-white cursor-pointer"
+        >
+            Weigeren
+        </button>
+    </div>
+</div>
+
+<script>
+    const CONSENT_KEY = 'loungefest-cookie-consent';
+
+    function activateEmbeds() {
+        document.querySelectorAll<HTMLIFrameElement>('[data-cookie-src]').forEach((iframe) => {
+            iframe.src = iframe.dataset.cookieSrc ?? '';
+            const placeholder = iframe.closest('.cookie-embed')?.querySelector('.cookie-placeholder');
+            if (placeholder instanceof HTMLElement) {
+                placeholder.style.display = 'none';
+            }
+            iframe.style.display = '';
+        });
+    }
+
+    function hideBanner() {
+        const banner = document.getElementById('cookie-banner');
+        if (banner) banner.style.display = 'none';
+    }
+
+    const consent = localStorage.getItem(CONSENT_KEY);
+
+    if (consent === 'accepted') {
+        activateEmbeds();
+    } else if (consent !== 'declined') {
+        const banner = document.getElementById('cookie-banner');
+        if (banner) banner.style.display = 'block';
+    }
+
+    document.getElementById('cookie-accept')?.addEventListener('click', () => {
+        localStorage.setItem(CONSENT_KEY, 'accepted');
+        activateEmbeds();
+        hideBanner();
+    });
+
+    document.getElementById('cookie-decline')?.addEventListener('click', () => {
+        localStorage.setItem(CONSENT_KEY, 'declined');
+        hideBanner();
+    });
+</script>

@@ -3,6 +3,7 @@ import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import EasterEggs from "../components/visuals/EasterEggs.astro";
 import MackerelChatbot from "../components/visuals/MackerelChatbot.astro";
+import CookieConsent from "../components/ui/CookieConsent.astro";
 import "../styles/global.css";
 import fetchApi from "../lib/strapi";
 
@@ -52,6 +53,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 		<Footer showTicketButton={showTicketButton} />
 		<EasterEggs />
 		<MackerelChatbot />
+		<CookieConsent />
 	</body>
 </html>
 
