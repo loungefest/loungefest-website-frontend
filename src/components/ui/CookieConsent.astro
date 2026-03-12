@@ -9,6 +9,7 @@
     <div class="flex gap-3">
         <button
             id="cookie-accept"
+            data-cookie-accept
             class="flex-1 rounded-xl bg-lime px-4 py-2 text-sm font-bold text-plum transition-opacity hover:opacity-90 cursor-pointer"
         >
             Accepteren
@@ -50,7 +51,9 @@
         if (banner) banner.style.display = 'block';
     }
 
-    document.getElementById('cookie-accept')?.addEventListener('click', () => {
+    document.addEventListener('click', (e) => {
+        if (!(e.target instanceof Element)) return;
+        if (!e.target.closest('[data-cookie-accept]')) return;
         localStorage.setItem(CONSENT_KEY, 'accepted');
         activateEmbeds();
         hideBanner();
