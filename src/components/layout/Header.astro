@@ -55,7 +55,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 </header>
 
 <!-- Mobile Menu Overlay -->
-<div id="mobile-menu" class="fixed inset-0 bg-plum z-60 transform translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
+<div id="mobile-menu" class="fixed inset-0 bg-plum z-60 transform translate-x-full lg:hidden">
     <div class="flex flex-col h-full p-8 pt-32 relative overflow-hidden text-white">
         <!-- Icon in Menu -->
         <a href={base} class="absolute top-5 left-8 flex items-center transition-transform hover:scale-105 duration-300 z-10">
@@ -98,6 +98,11 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
     const closeMenu = document.getElementById('close-menu');
     const mobileMenu = document.getElementById('mobile-menu');
     const header = document.getElementById('main-header');
+
+    // Add transition classes after first render to prevent flash on page load
+    setTimeout(() => {
+        mobileMenu?.classList.add('transition-transform', 'duration-300', 'ease-in-out');
+    }, 0);
 
     let isMenuOpen = false;
     let lastScrollY = window.scrollY;
