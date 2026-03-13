@@ -21,6 +21,7 @@ const rawSponsors = await fetchApi<StrapiSponsor[]>({
         'sort[0]': 'priority:desc',
         'sort[1]': 'name:asc',
         populate: '*',
+        'pagination[pageSize]': '100',
     },
 });
 

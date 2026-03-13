@@ -84,6 +84,7 @@ const rawArtists = await fetchApi<StrapiArtist[]>({
         'populate[0]': 'image',
         'populate[1]': 'podium',
         'populate[2]': 'performances',
+        'pagination[pageSize]': '100',
     },
 });
 
@@ -92,6 +93,7 @@ const rawPodia = await fetchApi<StrapiPodium[]>({
     wrappedByKey: 'data',
     query: {
         'sort[0]': 'title:asc',
+        'pagination[pageSize]': '100',
     },
 });
 

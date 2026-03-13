@@ -49,6 +49,7 @@ const rawInfos = await fetchApi<StrapiInfo[]>({
     query: {
         'sort[0]': 'priority:asc',
         'sort[1]': 'title:asc',
+        'pagination[pageSize]': '100',
     },
 });
 

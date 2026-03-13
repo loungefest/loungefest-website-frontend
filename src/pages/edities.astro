@@ -23,6 +23,7 @@ const rawEdities = await fetchApi<StrapiEditie[]>({
     wrappedByKey: 'data',
     query: {
         'sort[0]': 'year:desc',
+        'pagination[pageSize]': '100',
     },
 });
 

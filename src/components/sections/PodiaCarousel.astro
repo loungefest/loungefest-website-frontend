@@ -29,6 +29,7 @@ const rawPodia = await fetchApi<StrapiPodium[]>({
     wrappedByKey: 'data',
     query: {
         populate: '*',
+        'pagination[pageSize]': '100',
     },
 });
 
