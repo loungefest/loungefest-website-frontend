@@ -79,7 +79,7 @@ const rawArtists = await fetchApi<StrapiArtist[]>({
     endpoint: 'artists',
     wrappedByKey: 'data',
     query: {
-        'sort[0]': 'priority:desc',
+        'sort[0]': 'priority:asc',
         'sort[1]': 'name:asc',
         'populate[0]': 'image',
         'populate[1]': 'podium',

@@ -7,6 +7,10 @@ import heroImage from '../assets/images/lf-hero.jpg';
 import fetchApi from '../lib/strapi';
 import { marked } from 'marked';
 
+const renderer = new marked.Renderer();
+renderer.link = ({ href, title, text }) =>
+    `<a href="${href}"${title ? ` title="${title}"` : ''} target="_blank" rel="noopener noreferrer">${text}</a>`;
+
 type StrapiInfo = {
     title: string;
     description: any;
@@ -44,6 +48,7 @@ const rawInfos = await fetchApi<StrapiInfo[]>({
     wrappedByKey: 'data',
     query: {
         'sort[0]': 'priority:asc',
+        'sort[1]': 'title:asc',
     },
 });
 
@@ -63,7 +68,7 @@ const infos = (await Promise.all(
         return {
             title: info?.title ?? '',
             description: descriptionText,
-            descriptionHtml: await marked.parse(descriptionText),
+            descriptionHtml: await marked.parse(descriptionText, { renderer }),
             id: docId.toString() || (info?.title ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         };
     })
