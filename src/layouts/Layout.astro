@@ -34,7 +34,7 @@ const globalData = await fetchApi<StrapiGlobal>({
 	wrappedByKey: 'data',
 	query: {
 		'populate[defaultSeo][populate]': '*',
-		'populate[favicon]': '*',
+		'populate[favicon][populate]': '*',
 	},
 });
 
