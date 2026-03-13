@@ -31,7 +31,7 @@ import makreelImg from '../../assets/images/makreel.png';
         </div>
 
         <div class="chat-input-row">
-            <input type="text" id="chat-input" placeholder="Stel een vraag..." autocomplete="off" maxlength="200" />
+            <input type="text" id="chat-input" placeholder="Stel een vraag..." autocomplete="off" maxlength="200" enterkeyhint="send"  />
             <button id="chat-send" aria-label="Verstuur">&#10148;</button>
         </div>
     </div>
@@ -299,7 +299,7 @@ import makreelImg from '../../assets/images/makreel.png';
         border: 1px solid #d1d1d6;
         border-radius: 20px;
         padding: 7px 14px;
-        font-size: 13px;
+        font-size: 16px;
         outline: none;
         background: #f5f5f7;
         transition: border-color 0.15s;
@@ -478,4 +478,25 @@ import makreelImg from '../../assets/images/makreel.png';
     input?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleSend();
     });
+
+    // On mobile, reposition only the chat window above the virtual keyboard when it opens.
+    // The toggle button stays at its natural position and can go behind the keyboard.
+    function adjustForKeyboard() {
+        if (!chatWin || !window.visualViewport) return;
+        const vv = window.visualViewport;
+        const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+        if (keyboardHeight > 0 && chatWin.getAttribute('aria-hidden') === 'false') {
+            chatWin.style.position = 'fixed';
+            chatWin.style.bottom = `${keyboardHeight + 24}px`;
+            chatWin.style.right = '24px';
+        } else {
+            chatWin.style.position = '';
+            chatWin.style.bottom = '';
+            chatWin.style.right = '';
+        }
+    }
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', adjustForKeyboard);
+        window.visualViewport.addEventListener('scroll', adjustForKeyboard);
+    }
 </script>
