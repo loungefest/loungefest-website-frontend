@@ -11,12 +11,31 @@ interface StrapiGlobal {
 	siteName: string;
 	siteDescription: string;
 	showTicketButton: boolean;
+	currentYear: number;
+	favicon: {
+		url: string;
+		mime: string;
+	} | null;
+	defaultSeo: {
+		metaTitle: string;
+		metaDescription: string;
+		shareImage: {
+			url: string;
+			width: number;
+			height: number;
+			alternativeText: string | null;
+		};
+	};
 	attributes?: any;
 }
 
 const globalData = await fetchApi<StrapiGlobal>({
 	endpoint: 'global',
 	wrappedByKey: 'data',
+	query: {
+		'populate[defaultSeo][populate]': '*',
+		'populate[favicon]': '*',
+	},
 });
 
 const global = globalData?.attributes ?? globalData;
@@ -24,6 +43,12 @@ const global = globalData?.attributes ?? globalData;
 const siteName = global?.siteName ?? "Loungefest | Noordwijkerhout | Comomeer";
 const siteDescription = global?.siteDescription ?? "Zin in het gezelligste feestje van de Bollenstreek? Kom naar Loungefest! Ontdek nieuwe bands, dans bij de lola's en beleef een onvergetelijk weekend. Mis het niet en koop nu je kaarten.";
 const showTicketButton = global?.showTicketButton ?? true;
+const currentYear = global?.currentYear ?? new Date().getFullYear();
+const favicon = global?.favicon;
+const defaultSeo = global?.defaultSeo;
+const metaTitle = defaultSeo?.metaTitle ?? siteName;
+const metaDescription = defaultSeo?.metaDescription ?? siteDescription;
+const shareImage = defaultSeo?.shareImage;
 
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
@@ -33,11 +58,27 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
-		<link rel="icon" href={`${base}favicon.ico`} />
+		{favicon
+			? <link rel="icon" type={favicon.mime} href={favicon.url} />
+			: <>
+				<link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+				<link rel="icon" href={`${base}favicon.ico`} />
+			</>
+		}
 		<meta name="generator" content={Astro.generator} />
-		<title>{siteName}</title>
-		<meta name="description" content={siteDescription} />
+		<title>{metaTitle}</title>
+		<meta name="description" content={metaDescription} />
+		<meta property="og:title" content={metaTitle} />
+		<meta property="og:description" content={metaDescription} />
+		<meta property="og:type" content="website" />
+		{shareImage && <meta property="og:image" content={shareImage.url} />}
+		{shareImage && <meta property="og:image:width" content={String(shareImage.width)} />}
+		{shareImage && <meta property="og:image:height" content={String(shareImage.height)} />}
+		{shareImage?.alternativeText && <meta property="og:image:alt" content={shareImage.alternativeText} />}
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={metaTitle} />
+		<meta name="twitter:description" content={metaDescription} />
+		{shareImage && <meta name="twitter:image" content={shareImage.url} />}
 		<link rel="preload" as="font" type="font/woff2" href="/fonts/ClashDisplay-Semibold.woff2" crossorigin />
 		<link rel="preload" as="font" type="font/woff2" href="/fonts/ClashDisplay-Bold.woff2" crossorigin />
 		<link rel="preload" as="font" type="font/woff2" href="/fonts/ClashDisplay-Medium.woff2" crossorigin />
