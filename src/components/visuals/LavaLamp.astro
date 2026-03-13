@@ -8,6 +8,19 @@ interface Props {
     responsive?: boolean;
 }
 
+// Mirror of the @theme colors in global.css — resolved at build time so the
+// canvas never has to look up CSS variables at runtime (which is unreliable
+// when a CDN serves a stale/missing CSS file).
+const THEME_COLORS: Record<string, string> = {
+    sky:      'oklch(0.659 0.113 243.72)',
+    midnight: 'oklch(0.267 0.071 285.22)',
+    plum:     'oklch(0.364 0.142 341.53)',
+    magenta:  'oklch(0.665 0.228 340.24)',
+    sand:     'oklch(0.926 0.013 82.40)',
+    lime:     'oklch(0.872 0.209 120.90)',
+    bronze:   'oklch(0.464 0.089 94.82)',
+};
+
 const {
     color = 'oklch(0.364 0.142 341.53)',
     numBalls = 6,
@@ -16,20 +29,19 @@ const {
     overflow,
     responsive = false,
 } = Astro.props;
+
+const isDirectColor = color.startsWith('#') || color.startsWith('rgb') ||
+                      color.startsWith('hsl') || color.startsWith('oklch');
+const resolvedColor = isDirectColor ? color : (THEME_COLORS[color] ?? color);
 ---
 
 <div class="lavalamp-container"
-    data-color={color}
+    data-color={resolvedColor}
     data-num-balls={numBalls}
     data-ball-size={ballSize}
     data-animated={animated.toString()}
     data-overflow={overflow !== undefined ? overflow.toString() : undefined}
     data-responsive={responsive.toString()}
-    style={
-        color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') || color.startsWith('oklch')
-            ? `--lava-color: ${color}`
-            : `--lava-color: var(--color-${color})`
-    }
 >
     <canvas class="lavalamp-canvas"></canvas>
 </div>
@@ -284,21 +296,6 @@ const {
         }
     }
 
-    function resolveColor(container: HTMLElement, value: string): string {
-        if (value.startsWith('#') || value.startsWith('rgb') || value.startsWith('hsl') || value.startsWith('oklch')) {
-            return value;
-        }
-        // Read --lava-color from the element itself (set via inline style using var(--color-NAME)).
-        // This is more reliable than reading from document.documentElement because:
-        // - the custom property is scoped to the element
-        // - if the CSS file fails to load, we get '' instead of accidentally using a CSS named color
-        const fromVar = getComputedStyle(container).getPropertyValue('--lava-color').trim();
-        if (fromVar) return fromVar;
-        // Fallback: try document root directly
-        const resolved = getComputedStyle(document.documentElement).getPropertyValue(`--color-${value}`).trim();
-        return resolved || 'oklch(0.364 0.142 341.53)';
-    }
-
     function initLavaLamp(container: HTMLElement): void {
         const canvas = container.querySelector('.lavalamp-canvas') as HTMLCanvasElement;
         if (!canvas) return;
@@ -306,7 +303,9 @@ const {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const color = resolveColor(container, container.dataset.color || 'oklch(0.364 0.142 341.53)');
+        // data-color is pre-resolved to an oklch/hex/rgb value at build time by the
+        // Astro frontmatter, so no runtime CSS variable lookup is needed.
+        const color = container.dataset.color || 'oklch(0.364 0.142 341.53)';
         const numBalls = parseInt(container.dataset.numBalls || '6', 10);
         const ballSizeProp = parseFloat(container.dataset.ballSize || '1');
         const animated = container.dataset.animated !== 'false';
