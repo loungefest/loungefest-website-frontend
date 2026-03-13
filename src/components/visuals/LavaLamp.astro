@@ -25,6 +25,11 @@ const {
     data-animated={animated.toString()}
     data-overflow={overflow !== undefined ? overflow.toString() : undefined}
     data-responsive={responsive.toString()}
+    style={
+        color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') || color.startsWith('oklch')
+            ? `--lava-color: ${color}`
+            : `--lava-color: var(--color-${color})`
+    }
 >
     <canvas class="lavalamp-canvas"></canvas>
 </div>
@@ -279,13 +284,19 @@ const {
         }
     }
 
-    function resolveColor(value: string): string {
+    function resolveColor(container: HTMLElement, value: string): string {
         if (value.startsWith('#') || value.startsWith('rgb') || value.startsWith('hsl') || value.startsWith('oklch')) {
             return value;
         }
-        const cssVar = `--color-${value}`;
-        const resolved = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
-        return resolved || value;
+        // Read --lava-color from the element itself (set via inline style using var(--color-NAME)).
+        // This is more reliable than reading from document.documentElement because:
+        // - the custom property is scoped to the element
+        // - if the CSS file fails to load, we get '' instead of accidentally using a CSS named color
+        const fromVar = getComputedStyle(container).getPropertyValue('--lava-color').trim();
+        if (fromVar) return fromVar;
+        // Fallback: try document root directly
+        const resolved = getComputedStyle(document.documentElement).getPropertyValue(`--color-${value}`).trim();
+        return resolved || 'oklch(0.364 0.142 341.53)';
     }
 
     function initLavaLamp(container: HTMLElement): void {
@@ -295,7 +306,7 @@ const {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const color = resolveColor(container.dataset.color || 'oklch(0.364 0.142 341.53)');
+        const color = resolveColor(container, container.dataset.color || 'oklch(0.364 0.142 341.53)');
         const numBalls = parseInt(container.dataset.numBalls || '6', 10);
         const ballSizeProp = parseFloat(container.dataset.ballSize || '1');
         const animated = container.dataset.animated !== 'false';
