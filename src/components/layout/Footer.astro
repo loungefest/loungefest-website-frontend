@@ -6,9 +6,10 @@ import fetchApi from '../../lib/strapi';
 
 interface Props {
     showTicketButton?: boolean;
+    minimal?: boolean;
 }
 
-const { showTicketButton = true } = Astro.props;
+const { showTicketButton = true, minimal = false } = Astro.props;
 
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
@@ -26,6 +27,14 @@ const global = globalData?.attributes ?? globalData;
 const currentYear = global?.currentYear ?? new Date().getFullYear();
 ---
 
+{minimal ? (
+<footer class="bg-plum text-white py-8 px-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-white/60 font-sans text-sm">
+        <p>Copyright © {currentYear} Stichting NYCE</p>
+        <a href="mailto:info@loungefest.nl" class="hover:text-white transition-colors">info@loungefest.nl</a>
+    </div>
+</footer>
+) : (
 <footer class="bg-plum text-white relative overflow-hidden py-24 px-12 lg:px-24">
     <LavaLamp color="magenta" ballSize={4} numBalls={20} overflow={1000} responsive={true} />
 
@@ -87,6 +96,7 @@ const currentYear = global?.currentYear ?? new Date().getFullYear();
         <p>Copyright © {currentYear} Stichting NYCE</p>
     </div>
 </footer>
+)}
 
 <style>
     /* Adding some organic feel to the background if needed, but Tailwind blur/opacity usually handles it well */

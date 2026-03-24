@@ -1,0 +1,119 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LoungefestIcon from '../components/logo/LoungefestIcon.astro';
+import LavaLamp from "../components/visuals/LavaLamp.astro";
+---
+
+<Layout showChatbot={false} showEasterEggs={false}>
+    <section class="relative bg-sand pt-48 pb-24 min-h-screen text-white overflow-hidden grow flex items-center">
+        <div class="absolute inset-0 overflow-hidden">
+            <LavaLamp color="lime" ballSize={4} numBalls={15} overflow={500} animated={false} responsive={true} />
+        </div>
+
+        <canvas id="confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-20"></canvas>
+
+        <div class="container relative z-10 mx-auto px-4 max-w-5xl text-center">
+            <h1 class="font-display text-5xl sm:text-7xl md:text-9xl font-bold mb-8 tracking-tight text-bronze">
+                Gefeliciteerd!
+            </h1>
+            <p class="text-xl md:text-2xl text-bronze/80 leading-relaxed mb-4">
+                Bedankt voor het kopen van kaarten! Je krijgt binnen enkele ogenblikken jouw kaartjes in je e-mail!
+            </p>
+            <p class="text-lg text-bronze/50">
+                Niks gekregen? Neem dan contact op met <a href="mailto:ticketing@loungefest.nl" class="underline hover:text-bronze-700 transition-colors">ticketing@loungefest.nl</a>.<br />
+                We zien je op Loungefest!
+            </p>
+        </div>
+    </section>
+</Layout>
+
+<script>
+    const canvas = document.getElementById('confetti-canvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d')!;
+
+    const COLORS = ['#E4007C', '#C2E800', '#00B4D8', '#F5A623', '#ffffff', '#8B5CF6'];
+
+    interface Particle {
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        angle: number;
+        spin: number;
+        width: number;
+        height: number;
+        color: string;
+        opacity: number;
+    }
+
+    let particles: Particle[] = [];
+    let animationId: number;
+    let startTime: number;
+    const DURATION = 4000;
+
+    function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    }
+
+    function spawn(count: number) {
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: -10,
+                vx: (Math.random() - 0.5) * 4,
+                vy: Math.random() * 3 + 2,
+                angle: Math.random() * Math.PI * 2,
+                spin: (Math.random() - 0.5) * 0.2,
+                width: Math.random() * 10 + 6,
+                height: Math.random() * 5 + 3,
+                color: COLORS[Math.floor(Math.random() * COLORS.length)],
+                opacity: 1,
+            });
+        }
+    }
+
+    function draw(timestamp: number) {
+        const elapsed = timestamp - startTime;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Keep spawning for the first 2 seconds
+        if (elapsed < 2000 && Math.random() < 0.4) spawn(6);
+
+        particles = particles.filter(p => p.opacity > 0.01 && p.y < canvas.height + 20);
+
+        for (const p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.05; // gravity
+            p.angle += p.spin;
+
+            // Fade out in final second of duration
+            if (elapsed > DURATION - 1000) {
+                p.opacity -= 0.015;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.opacity);
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.width / 2, -p.height / 2, p.width, p.height);
+            ctx.restore();
+        }
+
+        if (elapsed < DURATION || particles.length > 0) {
+            animationId = requestAnimationFrame(draw);
+        }
+    }
+
+    function start() {
+        resize();
+        spawn(120);
+        startTime = performance.now();
+        animationId = requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', resize);
+    start();
+</script>

@@ -5,14 +5,27 @@ import Button from '../ui/Button.astro';
 
 interface Props {
     showTicketButton?: boolean;
+    minimal?: boolean;
 }
 
-const { showTicketButton = true } = Astro.props;
+const { showTicketButton = true, minimal = false } = Astro.props;
 
 const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
 
+{minimal ? (
+<header class="fixed top-0 left-0 right-0 z-50 pt-4 px-4 md:px-8 pointer-events-none">
+    <div class="container mx-auto max-w-6xl bg-plum text-white px-6 md:px-10 h-20 flex items-center justify-start shadow-2xl rounded-full relative overflow-hidden pointer-events-auto">
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <LavaLamp color="magenta" ballSize={5} numBalls={30} overflow={300} responsive={true} />
+        </div>
+        <a href={base} class="flex items-center z-10 transition-transform hover:scale-105 duration-300">
+            <LoungefestIcon class="h-10 w-10" aria-label="Loungefest Logo" />
+        </a>
+    </div>
+</header>
+) : (
 <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 pt-4 px-4 md:px-8 pointer-events-none">
     <div class="container mx-auto max-w-6xl bg-plum text-white px-6 md:px-10 h-20 flex items-center justify-between shadow-2xl rounded-full relative overflow-hidden pointer-events-auto">
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
@@ -92,6 +105,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         )}
     </div>
 </div>
+)}
 
 <script>
     const menuToggle = document.getElementById('menu-toggle');
