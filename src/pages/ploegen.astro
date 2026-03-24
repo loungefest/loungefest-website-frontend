@@ -106,9 +106,34 @@ const ploegen = (await Promise.all(
     <TicketsCTA variant="sky" />
 </Layout>
 
-<style>
+<style is:global>
     .ploeg-card.active .ploeg-overlay {
         opacity: 1;
+    }
+
+    .egg-easter {
+        position: absolute;
+        left: -48px;
+        top: 22%;
+        z-index: 0;
+        transform: translateX(40px) rotate(30deg);
+        transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+        filter: drop-shadow(3px 5px 10px rgba(0, 0, 0, 0.45));
+    }
+
+    .ploeg-card:hover .egg-easter,
+    .ploeg-card.active .egg-easter {
+        transform: translateX(0px) rotate(-6deg);
+    }
+
+    .egg-easter.peek {
+        transform: translateX(48px) rotate(15deg);
+    }
+
+    .egg-image-z {
+        position: relative;
+        z-index: 1;
     }
 </style>
 
@@ -125,4 +150,43 @@ const ploegen = (await Promise.all(
     document.addEventListener('click', () => {
         document.querySelectorAll('.ploeg-card').forEach((c) => c.classList.remove('active'));
     });
+
+    // 🥚 Paasei: verschijnt vanuit achter een willekeurige ploeg-afbeelding
+    const ploegenCards = Array.from(document.querySelectorAll('.ploeg-card'));
+    if (ploegenCards.length > 0) {
+        const eggCard = ploegenCards[Math.floor(Math.random() * ploegenCards.length)] as HTMLElement;
+        const imageContainer = eggCard.querySelector('.aspect-square') as HTMLElement | null;
+
+        if (imageContainer) {
+            imageContainer.classList.add('egg-image-z');
+
+            const egg = document.createElement('div');
+            egg.className = 'egg-easter';
+            egg.setAttribute('aria-hidden', 'true');
+            egg.innerHTML = `
+                <svg width="68" height="85" viewBox="0 0 68 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="34" cy="46" rx="28" ry="36" fill="#FFE566"/>
+                    <path d="M7.5 60 Q34 67 60.5 60 Q58 73 34 79 Q10 73 7.5 60Z" fill="#FF6B9D"/>
+                    <path d="M6.5 46 Q34 53 61.5 46 Q61 57 34 63 Q7 57 6.5 46Z" fill="#9B59B6"/>
+                    <path d="M7.5 33 Q34 40 60.5 33 Q60 44 34 50 Q8 44 7.5 33Z" fill="#4ECDC4"/>
+                    <circle cx="21" cy="38" r="3.2" fill="#FFE566"/>
+                    <circle cx="34" cy="36" r="3.2" fill="#FFE566"/>
+                    <circle cx="47" cy="38" r="3.2" fill="#FFE566"/>
+                    <circle cx="23" cy="66" r="2.8" fill="white" opacity="0.8"/>
+                    <circle cx="45" cy="66" r="2.8" fill="white" opacity="0.8"/>
+                    <ellipse cx="23" cy="24" rx="6" ry="9" fill="white" opacity="0.28" transform="rotate(-12 23 24)"/>
+                </svg>
+            `;
+            eggCard.appendChild(egg);
+
+            // Na een willekeurige vertraging even heel kort piepen om de hint te geven
+            const peekDelay = 20000 + Math.random() * 40000;
+            setTimeout(() => {
+                if (!eggCard.classList.contains('active') && !eggCard.matches(':hover')) {
+                    egg.classList.add('peek');
+                    setTimeout(() => egg.classList.remove('peek'), 1800);
+                }
+            }, peekDelay);
+        }
+    }
 </script>
