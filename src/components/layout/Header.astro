@@ -120,7 +120,9 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
     let isMenuOpen = false;
     let lastScrollY = window.scrollY;
+    let scrollUpAccumulated = 0;
     const headerHeight = 80; // Adjusted for new h-20
+    const SCROLL_UP_THRESHOLD = 50; // px of upward scroll needed to show header
 
     const toggleMenu = () => {
         isMenuOpen = !isMenuOpen;
@@ -138,13 +140,18 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         if (!header || isMenuOpen) return;
 
         const currentScrollY = window.scrollY;
+        const delta = currentScrollY - lastScrollY;
 
-        if (currentScrollY > lastScrollY && currentScrollY > headerHeight + 50) {
-            // Scrolling down and past threshold
+        if (delta > 0 && currentScrollY > headerHeight + 10) {
+            // Scrolling down and past threshold — hide header and reset accumulator
             header.style.transform = 'translateY(-150%)';
-        } else {
-            // Scrolling up
-            header.style.transform = 'translateY(0)';
+            scrollUpAccumulated = 0;
+        } else if (delta < 0) {
+            // Scrolling up — accumulate upward distance
+            scrollUpAccumulated += Math.abs(delta);
+            if (scrollUpAccumulated >= SCROLL_UP_THRESHOLD) {
+                header.style.transform = 'translateY(0)';
+            }
         }
 
         lastScrollY = currentScrollY;
