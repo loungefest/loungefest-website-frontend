@@ -221,7 +221,8 @@ const resolvedColor = isDirectColor ? color : (THEME_COLORS[color] ?? color);
 
             if (mscase === 15) {
                 // Encode: nx, ny-1, dir=0 (unused, pdir=false equivalent)
-                return nx | ((ny - 1) << 10) | (0 << 20) | (1 << 30); // flag bit 30 = "no dir"
+                // Bit layout: nx=bits 0-12, ny=bits 13-25, dir=bits 26-27, flag=bit 28
+                return nx | ((ny - 1) << 13) | (0 << 26) | (1 << 28); // flag bit 28 = "no dir"
             }
 
             if (mscase === 5) dir = (pdir === 2) ? 3 : 1;
@@ -247,7 +248,8 @@ const resolvedColor = isDirectColor ? color : (THEME_COLORS[color] ?? color);
             );
             this.paint = true;
 
-            return (nx + this.ix[dir + 4]) | ((ny + this.ix[dir + 8]) << 10) | (dir << 20);
+            // 13 bits per coordinate supports grid indices up to 8191 (canvas ~40 000 px at step=5)
+            return (nx + this.ix[dir + 4]) | ((ny + this.ix[dir + 8]) << 13) | (dir << 26);
         }
 
         renderMetaballs(ctx: CanvasRenderingContext2D, animated: boolean): void {
@@ -276,12 +278,12 @@ const resolvedColor = isDirectColor ? color : (THEME_COLORS[color] ?? color);
                     if (result === -1) {
                         hasResult = false;
                     } else {
-                        cx = result & 0x3FF;
-                        cy = (result >> 10) & 0x3FF;
-                        if (result & (1 << 30)) {
+                        cx = result & 0x1FFF;
+                        cy = (result >> 13) & 0x1FFF;
+                        if (result & (1 << 28)) {
                             cdir = -1; // "no dir" flag
                         } else {
-                            cdir = (result >> 20) & 0x3FF;
+                            cdir = (result >> 26) & 0x3;
                         }
                     }
                 } while (hasResult);
