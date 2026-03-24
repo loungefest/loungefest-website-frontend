@@ -11,25 +11,13 @@ import yogaImg3 from '../assets/images/vogel-yoga-3.jpg';
 ---
 
 <Layout>
-    <!-- Hero Banner -->
-    <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
-        <Image
-            src={heroImage}
-            alt="Vogel Yoga Hero"
-            class="absolute inset-0 h-full w-full object-cover"
-            loading="eager"
-        />
-        <div class="absolute inset-0 bg-sky/40 mix-blend-multiply"></div>
-        <div class="absolute inset-0 bg-black/30"></div>
-    </section>
-
     <!-- Main Content -->
     <section class="bg-midnight py-24 text-white min-h-screen relative">
         <div class="absolute inset-0 overflow-hidden">
             <LavaLamp color="sky" ballSize={4} numBalls={15} overflow={500} animated={false} responsive={true} />
         </div>
 
-        <div class="container mx-auto px-4 max-w-5xl relative z-10">
+        <div class="container mx-auto px-4 pt-24 max-w-5xl relative z-10">
 
             <!-- Page title -->
             <div class="text-center mb-20">
