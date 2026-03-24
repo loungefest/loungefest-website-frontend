@@ -5,29 +5,29 @@ import LavaLamp from '../components/visuals/LavaLamp.astro';
 ---
 
 <Layout>
-    <section class="bg-lime relative overflow-hidden flex-grow flex items-center justify-center py-24 text-plum min-h-[80vh]">
-        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-            <LavaLamp color="lime" ballSize={12} numBalls={30} responsive={true} />
+    <section class="bg-sand relative overflow-hidden flex-grow flex items-center justify-center py-24 text-plum min-h-[80vh]">
+        <div class="absolute inset-0 overflow-hidden">
+            <LavaLamp color="lime" ballSize={4} numBalls={15} overflow={500} animated={false} responsive={true} />
         </div>
 
-        <div class="container mx-auto px-4 max-w-4xl text-center relative z-10">
+        <div class="container mx-auto px-4 max-w-4xl pt-24 text-center relative z-10">
             <div class="relative inline-block mb-8">
-                <h1 class="font-display text-[12rem] md:text-[18rem] font-bold leading-none text-magenta drop-shadow-2xl animate-pulse-slow">
+                <h1 class="font-display text-[8rem] md:text-[18rem] font-bold leading-none text-bronze drop-shadow-2xl animate-pulse-slow">
                     404
                 </h1>
-                <div class="absolute -top-4 -right-4 md:-top-8 md:-right-8 bg-plum text-white font-display font-bold text-xl md:text-2xl px-6 py-2 rounded-full rotate-12 shadow-xl">
+                <div class="absolute -top-4 -right-4 md:-top-8 md:-right-8 bg-magenta text-white font-display font-bold text-xl md:text-2xl px-6 py-2 rounded-full rotate-12 shadow-xl">
                     OEPS!
                 </div>
             </div>
-            <h2 class="font-display text-4xl md:text-6xl font-bold mb-8 tracking-tight">
+            <h2 class="font-display text-4xl md:text-6xl font-bold mb-8 tracking-tight text-bronze">
                 Pagina niet gevonden.
             </h2>
-            <p class="text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">
+            <p class="text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed text-bronze">
                 Het lijkt erop dat de pagina die je zoekt is gaan loungen op een andere plek.
                 Geen zorgen, het feestje gaat gewoon door op onze homepagina!
             </p>
             <div class="flex justify-center">
-                <Button href="/" variant="plum" size="xl">
+                <Button href="/" variant="outline" color="midnight" size="xl">
                     Terug naar Home
                 </Button>
             </div>
