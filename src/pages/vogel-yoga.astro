@@ -1,0 +1,187 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/ui/Button.astro';
+import TicketsCTA from '../components/sections/TicketsCTA.astro';
+import LavaLamp from '../components/visuals/LavaLamp.astro';
+import { Image } from 'astro:assets';
+import heroImage from '../assets/images/lf-hero.jpg';
+import yogaImg1 from '../assets/images/vogel-yoga-1.jpg';
+import yogaImg2 from '../assets/images/vogel-yoga-2.jpg';
+import yogaImg3 from '../assets/images/vogel-yoga-3.jpg';
+---
+
+<Layout>
+    <!-- Hero Banner -->
+    <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
+        <Image
+            src={heroImage}
+            alt="Vogel Yoga Hero"
+            class="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
+        />
+        <div class="absolute inset-0 bg-sky/40 mix-blend-multiply"></div>
+        <div class="absolute inset-0 bg-black/30"></div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="bg-midnight py-24 text-white min-h-screen relative">
+        <div class="absolute inset-0 overflow-hidden">
+            <LavaLamp color="sky" ballSize={4} numBalls={15} overflow={500} animated={false} responsive={true} />
+        </div>
+
+        <div class="container mx-auto px-4 max-w-5xl relative z-10">
+
+            <!-- Page title -->
+            <div class="text-center mb-20">
+                <span class="inline-block bg-white/20 border border-white/40 text-white font-display font-bold text-sm uppercase tracking-widest px-5 py-2 rounded-full mb-8">
+                    Nieuw bij Loungefest 2026
+                </span>
+                <h1 class="text-center font-display text-5xl sm:text-7xl md:text-8xl font-bold mb-16 tracking-tight text-white">
+                    Vogel Yoga
+                </h1>
+                <p class="text-white/60 text-xl md:text-2xl">Ontspan. Adem. Vlieger worden.</p>
+            </div>
+
+            <!-- Intro beschrijving -->
+            <div class="bg-plum rounded-[2rem] p-8 md:p-12 mb-8">
+                <p class="text-white/80 text-lg md:text-xl leading-relaxed">
+                    Na jaren van intensief onderzoek in samenwerking met Defensie, de gemeente en Stichting Roofvogelbeheer presenteert Loungefest met trots een geheel nieuwe discipline: <strong class="text-white">Vogel Yoga</strong>. Onder begeleiding van gecertificeerde instructievogels leer je hoe je spanning loslaat, je balans vindt en je innerlijke vogel wakker kust.
+                </p>
+            </div>
+
+            <!-- Intro block -->
+            <div class="bg-plum rounded-[2rem] p-8 md:p-12 mb-20 relative">
+                <span class="absolute top-6 left-8 text-7xl text-white/10 font-serif leading-none select-none">"</span>
+                <blockquote class="relative pl-6 border-l-2 border-lime/50">
+                    <p class="text-white/80 text-lg md:text-xl leading-relaxed italic">
+                        Na de succesvolle inzet van onze Vogelzaken-eenheid tijdens Loungefest 2025 — waarbij onze valken drie meeuwaanvallen wisten te neutraliseren — merkten we iets opvallends. Bezoekers die de vogels van dichtbij observeerden, rapporteerden een <strong class="text-lime not-italic">diep gevoel van innerlijke rust</strong>. Eén bezoeker stond twee uur lang roerloos op één been. Hij dacht dat hij een reiger was geworden.
+                    </p>
+                    <footer class="mt-6">
+                        <p class="text-white font-display font-bold text-sm tracking-widest uppercase">René van Vogelzaken</p>
+                        <p class="text-white/50 text-xs">Coördinator Luchtveiligheid & Wellness, Loungefest</p>
+                    </footer>
+                </blockquote>
+            </div>
+
+            <!-- Foto galerij -->
+            <div class="flex flex-col gap-4 mb-20">
+                <Image
+                    src={yogaImg1}
+                    alt="Vogel Yoga sessie"
+                    class="w-full rounded-3xl"
+                />
+                <div class="grid grid-cols-2 gap-4">
+                    <Image
+                        src={yogaImg2}
+                        alt="Vogel Yoga instructievogel"
+                        class="w-full rounded-3xl"
+                    />
+                    <Image
+                        src={yogaImg3}
+                        alt="Vogel Yoga deelnemers"
+                        class="w-full rounded-3xl"
+                    />
+                </div>
+            </div>
+
+            <!-- Yoga houdingen -->
+            <h2 class="font-display font-bold text-4xl sm:text-6xl text-white mb-10 tracking-tight">
+                De houdingen
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+                <div class="bg-plum rounded-[2rem] p-8 flex flex-col gap-4">
+                    <div class="text-5xl">🦅</div>
+                    <h3 class="font-display font-bold text-2xl text-white">De Arend Houding</h3>
+                    <p class="text-white/70 leading-relaxed">
+                        Spreid je armen wijd uit en til één been op. Probeer dit vijf minuten vol te houden terwijl onze getrainde zeearend vlak naast je zit en je kritisch aanstaart. Bevordert concentratie en lef.
+                    </p>
+                </div>
+
+                <div class="bg-plum rounded-[2rem] p-8 flex flex-col gap-4">
+                    <div class="text-5xl">🦆</div>
+                    <h3 class="font-display font-bold text-2xl text-white">De Kwakende Duik</h3>
+                    <p class="text-white/70 leading-relaxed">
+                        Buig voorover in een diepe yogaduik terwijl je zachtjes "kwak" zegt bij elke uitademing. Onze gecertificeerde eend-instructeur Henk corrigeert je techniek waar nodig. Ontspant de onderrug.
+                    </p>
+                </div>
+
+                <div class="bg-plum rounded-[2rem] p-8 flex flex-col gap-4">
+                    <div class="text-5xl">🦉</div>
+                    <h3 class="font-display font-bold text-2xl text-white">De Nachtelijke Uil</h3>
+                    <p class="text-white/70 leading-relaxed">
+                        Alleen beschikbaar in ploegendienst 22:00–06:00. Draai je hoofd langzaam 270 graden (of zo ver als het gaat — blessurepreventie staat voorop). Onze uil doet het voor. Verbetert de slaap.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Veiligheidsadvies -->
+            <div class="bg-bronze rounded-xl p-[1rem] mb-20 flex gap-4">
+                <span class="text-2xl shrink-0 mt-0.5">ℹ️</span>
+                <div>
+                    <h3 class="font-display font-bold text-lg text-lime mb-2">Veiligheidsadvies</h3>
+                    <p class="text-white/60 text-base leading-relaxed">
+                        Deelnemers worden dringend verzocht geen glimmende snacks, zilveren kleding of kraai-imitaties te dragen tijdens de sessies. Dit kan de instructievogels triggeren. Bij een vergissingsaanval door een valk kunt u terecht bij de EHBO-tent, waar een valkwondenspecialist aanwezig is met ervaring in roofdierrelaties.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Praktische info -->
+            <h2 class="font-display font-bold text-4xl sm:text-6xl text-white mb-10 tracking-tight">
+                Praktische info
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
+                <div class="bg-plum rounded-[2rem] p-8">
+                    <h3 class="font-display font-bold text-xl text-white mb-4">📍 Locatie</h3>
+                    <p class="text-white/70 leading-relaxed">
+                        Het Vogel Yoga-podium bevindt zich aan de noordkant van het festivalterrein, naast de valkenierpost. Volg de bordjes met een valk in yogahouding.
+                    </p>
+                </div>
+
+                <div class="bg-plum rounded-[2rem] p-8">
+                    <h3 class="font-display font-bold text-xl text-white mb-4">⏰ Tijden</h3>
+                    <p class="text-white/70 leading-relaxed">
+                        Sessies van 30 minuten, de gehele dag door. De uilen-sessie start stipt om 22:00 en vereist nachtvisie of een hoofdlampje (niet meegeleverd).
+                    </p>
+                </div>
+
+                <div class="bg-plum rounded-[2rem] p-8">
+                    <h3 class="font-display font-bold text-xl text-white mb-4">👕 Kledingadvies</h3>
+                    <p class="text-white/70 leading-relaxed">
+                        Comfortabele kleding is aanbevolen. Vermijd zilveren of glimmende accessoires. Veren zijn welkom maar kunnen de valken in verwarring brengen.
+                    </p>
+                </div>
+
+                <div class="bg-plum rounded-[2rem] p-8">
+                    <h3 class="font-display font-bold text-xl text-white mb-4">🎟️ Toegang</h3>
+                    <p class="text-white/70 leading-relaxed">
+                        Vogel Yoga is inbegrepen bij je festivalticket. Een certificaat van deelname (inclusief valkenstempel) is beschikbaar voor €5,- bij de yogatent.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Citaat René -->
+            <div class="bg-plum rounded-[2rem] p-8 md:p-12 relative">
+                <span class="absolute top-6 left-8 text-8xl text-white/10 font-serif leading-none select-none">"</span>
+                <blockquote class="relative pl-6 border-l-2 border-lime/50">
+                    <p class="text-white/80 text-xl md:text-2xl leading-relaxed italic">
+                        Vogel Yoga is de logische volgende stap in ons streven naar een veilig én spiritueel festival. De lucht is niet langer van de meeuwen alleen — de mat ook niet.
+                    </p>
+                    <footer class="mt-6">
+                        <p class="text-white font-display font-bold text-sm tracking-widest uppercase">René van Vogelzaken</p>
+                        <p class="text-white/50 text-xs">Coördinator Luchtveiligheid & Wellness, Loungefest</p>
+                    </footer>
+                </blockquote>
+            </div>
+
+        </div>
+    </section>
+
+    <TicketsCTA
+        variant="lime"
+        title="Klaar om je innerlijke vogel te ontdekken?"
+        description="Scoor nu je tickets voor Loungefest en mis de meest spirituele vogelervaringen van de Bollenstreek niet."
+        buttonText="Koop Tickets"
+    />
+</Layout>
