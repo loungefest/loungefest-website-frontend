@@ -7,6 +7,14 @@ import CookieConsent from "../components/ui/CookieConsent.astro";
 import "../styles/global.css";
 import fetchApi from "../lib/strapi";
 
+interface Props {
+	showChatbot?: boolean;
+	showEasterEggs?: boolean;
+	minimal?: boolean;
+}
+
+const { showChatbot = true, showEasterEggs = true, minimal = false } = Astro.props;
+
 interface StrapiGlobal {
 	siteName: string;
 	siteDescription: string;
@@ -87,13 +95,13 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" />
 	</head>
 	<body class="flex flex-col min-h-screen">
-		<Header showTicketButton={showTicketButton} />
-		<main class="flex-grow">
+		<Header showTicketButton={showTicketButton} minimal={minimal} />
+		<main class="flex-grow flex flex-col">
 			<slot />
 		</main>
-		<Footer showTicketButton={showTicketButton} />
-		<EasterEggs />
-		<MackerelChatbot />
+		<Footer showTicketButton={showTicketButton} minimal={minimal} />
+		{showEasterEggs && <EasterEggs />}
+		{showChatbot && <MackerelChatbot />}
 		<CookieConsent />
 	</body>
 </html>
