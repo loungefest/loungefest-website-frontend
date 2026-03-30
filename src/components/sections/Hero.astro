@@ -51,7 +51,7 @@ const extractText = (blocks: any): string => {
 const title = header?.title ?? "17 & 18 juli 2026";
 const subTitle = header?.subTitle ?? "Oosterduinse Meer - Noordwijkerhout";
 const description = await marked.parse(extractText(header?.description) || "Welkom bij Loungefest, hét festival waar muziek, sfeer en gezelligheid samenkomen in het hart van Noordwijkerhout! Laat je meevoeren door relaxte loungemuziek, zomerse beats en live acts terwijl je geniet van een ongedwongen festivalsfeer.");
-const buttonText = header?.buttonText ?? "Tickets kopen";
+const buttonText = header?.buttonText ?? "Kaarten kopen";
 const buttonLink = header?.buttonLink ?? "/tickets";
 const buttonEnabled = header?.buttonEnabled ?? true;
 const showTicketButton = global?.showTicketButton ?? true;
