@@ -1,11 +1,21 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Image } from 'astro:assets';
-import heroImage from '../assets/images/lf-hero.jpg';
 import LoungefestIcon from '../components/logo/LoungefestIcon.astro';
 import LavaLamp from "../components/visuals/LavaLamp.astro";
+import fetchApi from '../lib/strapi';
 import chunkVendors from '../assets/js/chunk-vendors.b6ec443c.js?url';
 import app from '../assets/js/app.66ee4f63.js?url';
+
+const globalData = await fetchApi<{ showTicketButton: boolean; attributes?: any }>({
+    endpoint: 'global',
+    wrappedByKey: 'data',
+    query: {
+        'populate[defaultSeo][populate]': '*',
+        'populate[favicon][populate]': '*',
+    },
+});
+const global = globalData?.attributes ?? globalData;
+const showTicketButton = global?.showTicketButton ?? true;
 ---
 
 <Layout showChatbot={false} showEasterEggs={false} minimal={true}>
@@ -21,9 +31,20 @@ import app from '../assets/js/app.66ee4f63.js?url';
         </div>
 
         <div class="container relative z-10 mx-auto px-4 max-w-6xl text-center">
-            <div id="app"></div>
+            {showTicketButton ? (
+                <div id="app"></div>
+            ) : (
+                <div class="flex flex-col items-center gap-6 text-plum">
+                    <p class="font-display font-bold text-3xl md:text-4xl">Tickets zijn momenteel niet beschikbaar.</p>
+                    <p class="text-lg opacity-70">Kom later terug voor meer informatie.</p>
+                </div>
+            )}
         </div>
     </section>
-    <script is:inline src={chunkVendors}></script>
-    <script is:inline src={app}></script>
+    {showTicketButton && (
+        <>
+            <script is:inline src={chunkVendors}></script>
+            <script is:inline src={app}></script>
+        </>
+    )}
 </Layout>
