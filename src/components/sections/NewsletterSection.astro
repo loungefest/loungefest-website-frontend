@@ -31,7 +31,7 @@ const extractText = (blocks: any): string => {
 };
 
 const title = newsletter?.title ?? "Blijf op de hoogte!";
-const description = extractText(newsletter?.description) || "Meld je aan voor onze nieuwsbrief en mis niets over de line-up, tickets en meer Loungefest nieuws.";
+const description = extractText(newsletter?.description) || "Meld je aan voor onze nieuwsbrief en mis niets over de line-up, kaarten en meer Loungefest nieuws.";
 
 // Randomize icon position, size, and rotation
 const randomTop = Math.floor(Math.random() * 80) - 10; // Range: -10% to 70%
@@ -42,7 +42,7 @@ const randomRotation = Math.floor(Math.random() * 91) - 45; // Range: -45 to 45 
 
 <section class="relative bg-lime py-24 overflow-hidden">
     <!-- Decorative Icon Background -->
-    <div 
+    <div
         class="absolute opacity-20 pointer-events-none select-none"
         style={{
             top: `${randomTop}%`,

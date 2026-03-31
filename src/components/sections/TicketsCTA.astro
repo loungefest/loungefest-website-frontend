@@ -23,10 +23,10 @@ interface Props {
 	variant?: 'sky' | 'midnight' | 'plum' | 'magenta' | 'sand' | 'lime' | 'bronze' | 'white';
 }
 
-const { 
+const {
     title = "Zorg dat je erbij bent!",
-    description = "Scoor nu je tickets voor Loungefest en mis het meest relaxte festival van de Bollenstreek niet.",
-    buttonText = "Koop Tickets",
+    description = "Scoor nu je kaarten voor Loungefest en mis het meest relaxte festival van de Bollenstreek niet.",
+    buttonText = "Koop Kaarten",
     variant = "magenta"
 } = Astro.props;
 
@@ -93,7 +93,7 @@ const randomRotation = Math.floor(Math.random() * 91) - 45; // Range: -45 to 45 
 {showTicketButton && (
 <section class={`relative ${styles.bg} py-24 overflow-hidden`}>
     <!-- Decorative Icon Background -->
-    <div 
+    <div
         class="absolute opacity-20 pointer-events-none select-none"
         style={{
             top: `${randomTop}%`,
@@ -118,7 +118,7 @@ const randomRotation = Math.floor(Math.random() * 91) - 45; // Range: -45 to 45 
             </div>
 
             <div class="w-full md:w-auto shrink-0">
-                <Button href="/tickets" variant={styles.button as any} size="xl" class="w-full md:w-auto">
+                <Button href="/kaarten" variant={styles.button as any} size="xl" class="w-full md:w-auto">
                     {buttonText}
                 </Button>
             </div>
