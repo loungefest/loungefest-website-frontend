@@ -66,6 +66,14 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
+		<!-- Google tag (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-GLM87YLGP7"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'G-GLM87YLGP7');
+		</script>
 		{favicon
 			? <link rel="icon" type={favicon.mime} href={favicon.url} />
 			: <>
