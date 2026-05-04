@@ -423,6 +423,10 @@ import makreelImg from '../../assets/images/makreel-headset.png';
     function getResponse(text: string): string {
         const trimmed = text.trim();
 
+        if (/is\s+ben\s+gay/i.test(trimmed)) {
+            return "Ja, ze noemen hem ook wel 'Gay boy Ben'";
+        }
+
         if (!greeted && greetingPatterns.test(trimmed)) {
             greeted = true;
             return pickRandom(greetingResponses);
