@@ -20,6 +20,7 @@ type StrapiArtist = {
     day?: string;
     time?: string;
     image?: any;
+    headerImage?: any;
     podium?: any;
     description?: unknown;
     performances?: Performance[];
@@ -32,6 +33,7 @@ type ArtistPageData = {
     slug: string;
     name: string;
     imageUrl: string;
+    headerImageUrl: string;
     description: string;
     performances: NormalizedPerformance[];
     podium?: string;
@@ -117,6 +119,7 @@ export async function getStaticPaths() {
             'populate[0]': 'image',
             'populate[1]': 'podium',
             'populate[2]': 'performances',
+            'populate[3]': 'headerImage',
             'pagination[pageSize]': '100',
         },
     });
@@ -124,6 +127,7 @@ export async function getStaticPaths() {
     return (await Promise.all((rawArtists ?? []).map(async (item) => {
             const artist = item?.attributes ?? item;
             const imageMedia = artist?.image?.data ?? artist?.image;
+            const headerImageMedia = artist?.headerImage?.data ?? artist?.headerImage;
 
             const artistPodiumName =
                 artist?.podium?.data?.attributes?.title ||
@@ -136,10 +140,13 @@ export async function getStaticPaths() {
                     .filter((performance): performance is NormalizedPerformance => Boolean(performance))
                 : [];
 
+            const imageUrl = getStrapiMedia(imageMedia) ?? heroImage.src;
+
             const pageArtist: ArtistPageData = {
                 slug: artist?.slug ?? '',
                 name: artist?.name ?? '',
-                imageUrl: getStrapiMedia(imageMedia) ?? heroImage.src,
+                imageUrl,
+                headerImageUrl: getStrapiMedia(headerImageMedia) ?? imageUrl,
                 description: await marked.parse(extractDescription(artist?.description)),
                 performances,
                 podium: artistPodiumName,
@@ -163,7 +170,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 <Layout>
     <section class="relative h-[30vh] min-h-[200px] overflow-hidden">
         <img
-            src={artist.imageUrl}
+            src={artist.headerImageUrl}
             alt={artist.name}
             class="absolute inset-0 h-full w-full object-cover"
             loading="eager"
