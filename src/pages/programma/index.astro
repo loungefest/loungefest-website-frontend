@@ -81,9 +81,9 @@ const rawArtists = await fetchApi<StrapiArtist[]>({
     query: {
         'sort[0]': 'priority:asc',
         'sort[1]': 'name:asc',
-        'populate[0]': 'image',
-        'populate[1]': 'podium',
-        'populate[2]': 'performances',
+        'populate[image]': 'true',
+        'populate[podium]': 'true',
+        'populate[performances][populate][0]': 'podium',
         'pagination[pageSize]': '100',
     },
 });
