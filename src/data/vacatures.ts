@@ -105,7 +105,7 @@ export const vacatures: Vacature[] = [
             'De kans om het gaafste festival van de Bollenstreek mee te bouwen.'
         ],
         interestText: 'Kun je aan niets anders meer denken? Stuur dan meteen een motivatie naar ivar@loungefest.nl of stuur een appje naar 06-43214630. Ook voor vragen kun je hier terecht.',
-        contactEmail: 'ivar@loungefest.nl',
+        contactEmail: 'sjoerd@loungefest.nl',
         contactPhone: '06-43214630',
         contactName: 'Ivar'
     }
